@@ -4,7 +4,9 @@ import styles from './../style/style';
 import {NavigationActions} from 'react-navigation';
 
 
-import {ScrollView,TouchableOpacity,Image,Platform} from 'react-native';
+import { AsyncStorage, ScrollView,TouchableOpacity,Image,Platform} from 'react-native';
+import { baseURL } from '../../app.config';
+import axios from 'axios';
 
 import {
     Container,
@@ -34,6 +36,11 @@ import {
 const IS_IOS = Platform.OS === 'ios';
 
 class NavigationContent extends Component {
+  state = {
+    result: {},
+    token: ''
+  }
+
   navigateToScreen = (route) => () => {
     const navigateAction = NavigationActions.navigate({
       routeName: route
@@ -53,29 +60,55 @@ class NavigationContent extends Component {
     });
   }
 
-  
-  
+  async componentDidMount() {
+    this.setState({
+      token: await AsyncStorage.getItem('token')
+    }, () => {
+      this.fetchData(this.state.token)
+    });
+  }
+
+  fetchData = token => {
+    axios.get(`${baseURL}/user/me`, {
+      'headers': {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+      }
+    })
+    .then(response => {
+      this.setState({ result: response.data.user });
+    })
+    .catch(error => {
+      console.log(error)
+    })
+  }
+
 
   render () {
+    const { result } = this.state;
+
     return (
-        <View>
-        <ScrollView>
+      <View>
+        {
+          (result && result.id) &&
+          <ScrollView>
                     <View style={[styles.drawerContainer,styles.minHeight130,styles.paddingStatusBar]}>
                             <TouchableOpacity onPress={this.navigateToScreen('Account')} style={[styles.flexRow,styles.ValignCenter,styles.marginLR15]}>
                                 <View style={[styles.ValignCenter,styles.alignLeft,styles.marginL10]}>
                                      <Image style={[styles.Icon50,styles.borderRadius40]} source={{uri:'https://randomuser.me/api/portraits/med/men/85.jpg'}} />
                                 </View>
                                 <View style={[styles.ValignCenter,styles.alignLeft]}>
-                                    <Text style={[styles.fontSize18,styles.marginB10]}>John Smith </Text>
-                                    <Text style={[styles.fontSize14,styles.colorDarkGrey]}>johnsmith@gmail.com </Text>
+                                    <Text style={[styles.fontSize18,styles.marginB10]}>{result.first_name} {result.last_name} </Text>
+                                    <Text style={[styles.fontSize14,styles.colorDarkGrey]}>{result.email}</Text>
                                 </View>
                             </TouchableOpacity>
-                           
+
                      </View>
-                    
+
                 <View style={[styles.flexColumn]}>
 
-               
+
                     <View style={[styles.borderBottom]}></View>
 
                     <View style={[styles.marginT15,styles.alignLeft,styles.marginL20,styles.paddingB10,styles.flexRow,styles.paddingLR10]}>
@@ -118,7 +151,7 @@ class NavigationContent extends Component {
                         </Text>
                     </View>
                     <View style={[styles.borderBottom]}></View> */}
-{/* 
+{/*
                     <View style={[styles.marginT15,styles.alignLeft,styles.marginL20,styles.paddingB10,styles.flexRow,styles.paddingLR10]}>
                          <Image style={[styles.icon20,styles.marginR10,styles.ValignCenter]}source={require('./../../assets/sidebar/Feed.png')}/>
                           <Text style={[styles.colorDarkGrey,styles.ValignCenter,styles.marginL10]}  onPress={this.navigateToScreen('Feed')}>
@@ -139,7 +172,7 @@ class NavigationContent extends Component {
                     <View style={[styles.marginT15,styles.alignLeft,styles.marginL20,styles.paddingB10,styles.flexRow,styles.paddingLR10]}>
                         <Image style={[styles.icon20,styles.marginR10,styles.ValignCenter]}source={require('./../../assets/sidebar/Analysis.png')}/>
                           <Text style={[styles.colorDarkGrey,styles.ValignCenter,styles.marginL10]}  onPress={this.navigateToScreen('BodyMeasurements')}>
-                                Body Measurements 
+                                Body Measurements
                         </Text>
                     </View>
 
@@ -154,7 +187,7 @@ class NavigationContent extends Component {
                         </Text>
                     </View>
 
-                   
+
 
                     <View style={[styles.borderBottom]}></View>
 
@@ -166,7 +199,7 @@ class NavigationContent extends Component {
                         </Text>
                     </View> */}
 
-{/* 
+{/*
                     <View style={[styles.borderBottom]}></View>
                     <View style={[styles.marginT15,styles.alignLeft,styles.marginL20,styles.paddingB10,styles.flexRow,styles.paddingLR10]}>
                          <Image style={[styles.icon20,styles.marginR10,styles.ValignCenter]}source={require('./../../assets/sidebar/Account.png')}/>
@@ -204,8 +237,8 @@ class NavigationContent extends Component {
 
                     <View style={[styles.borderBottom]}></View> */}
 
-                  
-{/*                     
+
+{/*
                     <View style={[styles.marginT15,styles.alignLeft,styles.marginL20,styles.paddingB10,styles.flexRow,styles.paddingLR10]}>
                          <Image style={[styles.icon20,styles.marginR10,styles.ValignCenter]}source={require('./../../assets/sidebar/Logout.png')}/>
                           <Text style={[styles.colorDarkGrey,styles.ValignCenter,styles.marginL10]}  onPress={this.navigateToScreen('Login')}>
@@ -216,8 +249,8 @@ class NavigationContent extends Component {
 
                 </View>
                 </ScrollView>
-       </View>
-     
+        }
+      </View>
     );
   }
 }

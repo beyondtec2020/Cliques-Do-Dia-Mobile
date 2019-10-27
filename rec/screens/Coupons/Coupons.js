@@ -37,6 +37,8 @@ import {
 } from 'native-base';
 import { ScrollView } from 'react-native-gesture-handler';
  import MainHeader from '../../components/Header';
+import { baseURL } from '../../../app.config';
+
 // import Icon from '@expo/vector-icons/Ionicons';
 const IS_ANDROID = Platform.OS === 'android';
 const IS_IOS = Platform.OS === 'ios';
@@ -76,7 +78,7 @@ class Coupons extends Component {
 
 // async setupGoogleSignin() {
 //   try {
-  
+
 //     await GoogleSignin.configure({
 //       iosClientId: '266564509095-caq9m2s1kcuva38h4rt8qtn3d8nqq4q4.apps.googleusercontent.com',
 //       androidClientId:'266564509095-caq9m2s1kcuva38h4rt8qtn3d8nqq4q4.apps.googleusercontent.com',
@@ -101,7 +103,7 @@ class Coupons extends Component {
 //     scopes: ["profile", "email"]
 //   });}
 //   catch (error) {
-//     console.log("error:",error); 
+//     console.log("error:",error);
 //   }
 // }
 
@@ -149,7 +151,7 @@ TabSwitch = (index: number) => {
 //  this._configureGoogleSignIn();
 //  this._getCurrentUser();
 }
- 
+
 
 
 fetchData(){
@@ -162,31 +164,34 @@ console.log("city id----: ",this.state.city_id);
 console.log("searchText id----: ",this.state.searchText);
 
 
-const url="https://www.cliquesdodia.com.br/api/user/coupons?coupon_status="+this.state.selectedTabId;
-        
-  
+const url=`${baseURL}/user/coupons?coupon_status=${this.state.selectedTabId}`;
+
 fetch(url,
   {
-    method: 'GET',  
+    method: 'GET',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + this.state.token
    } }
   )
-.then(response => response.json())
+.then(response => {
+  debugger;
+  return response.json()
+})
 .then((responseJson)=> {
+  debugger;
   this.setState({
    Result: responseJson.data,
   });
   console.log("Result: ",this.state.Result);
 
-  // this.state.Result.map( (x,i) => 
-  // {  
+  // this.state.Result.map( (x,i) =>
+  // {
   //   console.log("Tittle:",x.title);  // value={x.id}  />
   //  console.log("images type---------------:",x.images.toString());
   //   console.log("min_price:",x.min_price);
-  //   console.log("short_desc:",x.short_desc); 
+  //   console.log("short_desc:",x.short_desc);
   //   console.log("id:",x.id);
   //   console.log("Tittle:",x.title);
   // })
@@ -195,7 +200,10 @@ fetch(url,
   });
 
 })
-.catch(error=>console.log(error)) //to catch the errors if any
+.catch(error => {
+  debugger;
+  console.log(error)
+}) //to catch the errors if any
 
 
 }
@@ -216,12 +224,12 @@ UseCoupon(id){
 
 
   console.log("this.state.offer_id=",id);
-    const URL="https://www.cliquesdodia.com.br/api/user/offer/"+id+'/use-coupon'
-  
+    const URL=`${baseURL}/user/offer/${id}/use-coupon`
+
             console.log("URL:",URL);
         fetch(URL,
           {
-            method: 'POST',  
+            method: 'POST',
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
@@ -234,19 +242,19 @@ UseCoupon(id){
           CouponResult: responseJson,
           });
           console.log("Result of coupon: ",this.state.CouponResult);
-  
+
            alert("concluída");
            this.fetchData();
-        
+
           this.setState({
             progressVisible: false,
           });
-  
+
         })
         .catch(error=>console.log(error)) //to catch the errors if any
-  
-              
-  
+
+
+
   }
 
 
@@ -255,12 +263,12 @@ UseCoupon(id){
 
 
     console.log("not used this.state.offer_id=",id);
-      const URL="https://www.cliquesdodia.com.br/api/user/offer/"+id+'/no-use-coupon'
-    
+      const URL=`${baseURL}/user/offer/${id}/no-use-coupon`
+
               console.log("URL:",URL);
           fetch(URL,
             {
-              method: 'POST',  
+              method: 'POST',
               headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
@@ -273,21 +281,21 @@ UseCoupon(id){
             CouponResult: responseJson,
             });
             console.log("Result of coupon: ",this.state.CouponResult);
-    
+
              alert("concluída");
              this.fetchData();
-          
+
             this.setState({
               progressVisible: false,
             });
-    
+
           })
           .catch(error=>console.log(error)) //to catch the errors if any
-    
-                
-    
+
+
+
     }
-  
+
 
   render() {
     const { selectedIndex,selectedTab } = this.state
@@ -298,10 +306,10 @@ UseCoupon(id){
     }
     // console.log(getStatusBarHeight());
     return (
-     
+
         <Container>
-         
-         
+
+
          <Header style={[styles.Mainheader]} >
           <Left  style={[styles.headerLeft]}>
           {/* <Button  onPress={this.openDrawer} transparent>
@@ -312,22 +320,22 @@ UseCoupon(id){
             <Title> <Text style={[styles.colorWhite,styles.fontSize20,styles.fontWeight500,styles.alignCenter]}>Meus Coupons</Text></Title>
           </Body>
           <Right style={[styles.headerRight]}>
-         
-           
+
+
           </Right>
         </Header>
-    
-                   
-        
+
+
+
 
         <Tabs  selectedIndex={selectedTab} TabSwitch={this.TabSwitch}  values={['EMITIDOS', 'ENCERRADOS','UTILIZADOS']}/>
 
           {selectedTab === 0
-                    && 
+                    &&
             <ScrollView>
           {
               (this.state.Result!=null)?
-              this.state.Result.map( (x) => 
+              this.state.Result.map( (x) =>
               (
                 <Card style={[styles.marginLR5]}>
                   <CardItem cardBody>
@@ -342,7 +350,7 @@ UseCoupon(id){
                           <View style={[styles.flexRow,styles.marginTB10,styles.width100p]}>
                               <Text style={[styles.fontWeight400,styles.fontSize16,styles.colorDarkGrey]}>código:</Text>
                               <Text style={[styles.fontWeight500,styles.fontSize16,styles.colorDarkGrey]}> {x.coupon_code}</Text>
-                            
+
                               <Button  onPress={()=> this.UseCoupon(x.id)}
                                small style={[styles.bgColorOrange,styles.alignRight,styles.marginT5]}>
                                 <Text>Usei</Text>
@@ -358,7 +366,7 @@ UseCoupon(id){
             </Card>
               ))
               :null
-    
+
           }
 
             {/* <Card style={[styles.marginLR5]}>
@@ -428,16 +436,16 @@ UseCoupon(id){
 
 
 </ScrollView>
-         
+
         }
-      
+
       {selectedTab === 1
-              && 
+              &&
               <ScrollView>
 
 {
               (this.state.Result!=null)?
-              this.state.Result.map( (x) => 
+              this.state.Result.map( (x) =>
               (
                 <Card style={[styles.marginLR5]}>
                   <CardItem cardBody>
@@ -461,18 +469,18 @@ UseCoupon(id){
             </Card>
               ))
               :null
-    
+
           }
-  
+
   </ScrollView>
-           
+
             }
      {selectedTab === 2
-              && 
+              &&
               <ScrollView>
          {
               (this.state.Result!=null)?
-              this.state.Result.map( (x) => 
+              this.state.Result.map( (x) =>
               (
                 <Card style={[styles.marginLR5]}>
                   <CardItem cardBody>
@@ -496,12 +504,12 @@ UseCoupon(id){
             </Card>
               ))
                 :null
-      
+
             }
-    
-  
+
+
   </ScrollView>
-           
+
      }
      <Footer style={[styles.bgColorWhite,styles.borderTop]}>
           <FooterTab style={[styles.bgColorWhite]}>
@@ -511,18 +519,18 @@ UseCoupon(id){
             <Button  onPress={()=> this.props.navigation.navigate('Coupons')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/coupon.png')} />
             </Button>
-        
+
             <Button  onPress={()=> this.props.navigation.navigate('offers')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/offer.png')} />
             </Button>
-            
+
             <Button onPress={()=> this.props.navigation.navigate('Account1')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/user.png')} />
             </Button>
           </FooterTab>
-          </Footer> 
+          </Footer>
         </Container>
-    
+
     );
   }
 }

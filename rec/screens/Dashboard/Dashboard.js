@@ -35,6 +35,9 @@ FooterTab,
 } from 'native-base';
 import { ScrollView } from 'react-native-gesture-handler';
 import CarouselItem from './components/CarouselItem';
+import axios from 'axios';
+import { baseURL } from '../../../app.config';
+
 // import Icon from '@expo/vector-icons/Ionicons';
 
 const IS_ANDROID = Platform.OS === 'android';
@@ -74,7 +77,7 @@ Images:[],
                  illustration: 'https://d1m6qo1ndegqmm.cloudfront.net/uploadimages/coupons/9159-Legacy-Restaurant_500x200.jpg'
               },
               {
-                  title: 'White Pocket Sunset', 
+                  title: 'White Pocket Sunset',
                   subtitle: 'Lorem ipsum dolor sit amet et nuncat ',
                  illustration: 'https://i.ibb.co/ynq4Gb9/C6-Lh-Chqw-BJRe-KWIh-Wy-Q9.jpg'
               },
@@ -83,7 +86,7 @@ Images:[],
                   subtitle: 'Lorem ipsum dolor sit amet et nuncat mergitur',
                  illustration: 'https://i.ibb.co/7n8S6KB/Pvq7-BOht-T1c4-EPh4sp8-I.jpg'
               },
-              
+
           ]
     }
     this.openDrawer = this.openDrawer.bind(this);
@@ -91,146 +94,125 @@ Images:[],
     this.fetchData=this.fetchData.bind(this);
   }
 
-  
+
   openDrawer() {
     this.props.navigation.toggleDrawer();
 }
 
-fetchData(){
-    this.setState({
-      progressVisible: true,
-    });
+  fetchData() {
+    const { city_id, selectedTabId, token } = this.state;
 
-  console.log("cat id----: ",this.state.selectedTabId)
-  console.log("city id----: ",this.state.city_id);
-  console.log("searchText id----: ",this.state.searchText);
-  
- 
-  const url="https://www.cliquesdodia.com.br/api/user/offers?category_id="+this.state.selectedTabId+"&city_id="+this.state.city_id+"&keyword="+this.state.searchText;
-          
-  fetch(url,
-    {
-      method: 'GET',  
+    this.setState({ progressVisible: true });
+
+    const url = `${baseURL}/user/offers?category_id=${selectedTabId}&city_id=${city_id}`;
+
+    axios.get(url, {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.state.token
-     } }
-    )
-  .then(response => response.json())
-  .then((responseJson)=> {
-    this.setState({
-     Result: responseJson.data,
-    });
-    console.log("Result: ",this.state.Result);
-
-    this.state.Result.map( (x,i) => 
-    {  
-      // console.log("Tittle:",x.title);  // value={x.id}  />
-    //  console.log("images type---------------:",x.images.toString());
-      // console.log("min_price:",x.min_price);
-      // console.log("short_desc:",x.short_desc); 
-      // console.log("id:",x.id);
-      // console.log("Tittle:",x.title);
+        Authorization: 'Bearer ' + token
+      }
     })
-    this.setState({
-      progressVisible: false,
-    });
+    .then(response => {
+      this.setState({ Result: response.data.data });
+    })
+    .finally(response => {
+      this.setState({ progressVisible: false });
+    })
 
-  })
-  .catch(error=>console.log(error)) //to catch the errors if any
+    this.carausalImages();
+  }
 
+  async componentDidMount() {
+    let token = await AsyncStorage.getItem('token');
 
-  this.CarausalImages();
+    this.setState({ token: token });
 
-}
-async componentDidMount(){
+    // console.log("token in Dashboard:", token);
+    // console.log("idddddd:",email);
+    if (token == null || token == '' || token == undefined) {
+      this.props.navigation.navigate('Login');
+    }
 
-  this.setState({
-    token:  await AsyncStorage.getItem("token"),
-  });
+    // console.log("will mount");
+    axios.get(`${baseURL}/categories`)
+    .then(response => {
+      this.setState({ Categories: response.data.data });
 
-   
-      console.log("token in Dashboard:",this.state.token);
-      // console.log("idddddd:",email);
-        
-  // if(token==null||token==''||token==undefined)
-  // {
-  //   this.props.navigation.navigate("Login");
-  // } 
-    console.log("will mount");
-    fetch("https://www.cliquesdodia.com.br/api/categories")
-    .then(response => response.json())
-    .then((responseJson)=> {
-      this.setState({
-       Categories: responseJson.data,
-      });
-      console.log("Cate-----------:",this.state.Categories);
-      this.state.Categories.map( (x,i) => 
-      { 
+      // console.log("Cate-----------:",this.state.Categories);
+
+      response.data.data.map((x,i) => {
         this.state.CategoryName.push(x.name);
-          
-        console.log("CatName:",this.state.CategoryName);  // value={x.id}  />
+        // console.log("CatName:",this.state.CategoryName);  // value={x.id}  />
       })
-   
     })
-    .catch(error=>console.log(error)) //to catch the errors if any
+    .catch(error => console.log(error))
 
-    
+    // fetch(`${baseURL}/categories`)
+    // .then(response => response.json())
+    // .then((responseJson)=> {
+    //   this.setState({
+    //    Categories: responseJson.data,
+    //   });
+    //   console.log("Cate-----------:",this.state.Categories);
+    //   this.state.Categories.map( (x,i) =>
+    //   {
+    //     this.state.CategoryName.push(x.name);
 
-    fetch("https://www.cliquesdodia.com.br/api/cities")
-    .then(response => response.json())
-    .then((responseJson)=> {
-      this.setState({
-       Cities: responseJson.data,
-      });
-      
-      console.log(this.state.Cities);
+    //     console.log("CatName:",this.state.CategoryName);  // value={x.id}  />
+    //   })
+
+    // })
+    // .catch(error=>console.log(error)) //to catch the errors if any
+
+    axios.get(`${baseURL}/cities`)
+    .then(response => {
+      this.setState({ Cities: response.data.data.data });
 
       this.fetchData();
-
     })
-    .catch(error=>console.log(error)) //to catch the errors if any
+    .catch(error => console.log(error))
 
     // this.setState({
     //   searchURL:"https://www.cliquesdodia.com.br/public_html/api/api/search?category_id="+2+"&city_id="+1
     //  });
-
-
   }
 
- 
-CarausalImages(){
-this.state.Images=[];
-  fetch("https://www.cliquesdodia.com.br/api/featured-slider?category_id="+this.state.selectedTabId+"&city_id="+this.state.city_id)
-  .then(response => response.json())
-  .then((responseJson)=> {
-   
-    console.log("Images-----------:",this.state.Images);
 
-    responseJson.data.map((Item)=>{
-      console.log("Images-----------:",Item);
-      this.state.Images.push({
-          title:'abc', 
+  carausalImages() {
+    const { city_id, selectedTabId } = this.state;
+    // this.state.Images = [];
+
+    axios.get(`${baseURL}/featured-slider?category_id=${selectedTabId}&city_id=${city_id}`)
+    .then(response => {
+      response.json()
+    })
+    .then(responseJson => {
+      // debugger;
+      // console.log("Images-----------:",this.state.Images);
+
+      responseJson.data.map((Item)=>{
+        console.log("Images-----------:",Item);
+        this.state.Images.push({
+          title:'abc',
           subtitle:'Earlier this morning, NYC',
           id:Item.id,
-          illustration:Item.image 
-        }) 
-        this.setState({
-          Images:this.state.Images
-         },()=> {       console.log("Images---araay--------:",this.state.Images);        });
+          illustration:Item.image
+        })
+        this.setState({ Images: this.state.Images },
+          () => { console.log("Images---araay--------:",this.state.Images) }
+        );
+      })
+    })
+    .catch(error => {
+      // debugger;
+      console.log(error)
+    })
+    .finally(response => {
 
     })
+  }
 
-
- 
-  })
-  .catch(error=>console.log(error)) //to catch the errors if any
-
-
-
-
-}
   handleOTP = (text) => {
     this.setState({
       searchText: text
@@ -238,8 +220,8 @@ this.state.Images=[];
           this.fetchData();
         });
   }
- 
-TabSwitch = (index: number) => 
+
+TabSwitch = (index: number) =>
 {
   this.setState(prevState => ({ ...prevState, selectedTab: index }))
   console.log("selected tab:",index);
@@ -260,10 +242,10 @@ TabSwitch = (index: number) =>
           this.fetchData();
         });
   }
-  
+
   // this.state.selectedTableId = index+1;
   // console.log("selected tab id-------::",this.state.selectedTabId)0
-  
+
 }
 
 _renderItem ({item, index}) {
@@ -282,7 +264,7 @@ _renderItemWithParallax ({item, index}, parallaxProps) {
 
 
 CityList = () =>{
-  return( this.state.Cities.map( (x,i) => { 
+  return( this.state.Cities.map( (x,i) => {
         return( <Picker.Item label={x.name} key={i} value={x.id}  />)} ));
 }
 
@@ -327,21 +309,21 @@ mainExample (number, title) {
       StatusBar.setTranslucent(true)
     }
 
-    
+
     // console.log(getStatusBarHeight());
     return (
       <Container>
-           
+
          <ScrollView>
           <Header  rounded style={[styles.Header,]} >
             <Left  style={[styles.headerLeft]}>
-              {/* <Button onPress={this.openDrawer}  transparent>
+              <Button onPress={this.openDrawer}  transparent>
               <Image style={{height:15,width:18}} source={require('./../../../assets/menu.png')} />
-              </Button> */}
+              </Button>
             </Left>
             <Body style={[styles.headerBody,]}>
-                
-            
+
+
             {
               (this.state.Cities)?
                 <Picker
@@ -363,27 +345,27 @@ mainExample (number, title) {
                   }>
                     { this.CityList() }
                     {/* CityList = () =>{
-  return( this.state.Cities.map( (x,i) => { 
+  return( this.state.Cities.map( (x,i) => {
         return( <Picker.Item label={x.name} key={i} value={x.id}  />)} ));
 } */}
-                   
-                
+
+
                 </Picker>
         :null
         }
             </Body>
             <Right style={[styles.headerRight]}>
-              {/* <Button small transparent>
+              <Button small transparent>
               <Image style={{height:15,width:15}} source={require('./../../../assets/cart.png')} />
-              </Button> */}
+              </Button>
             </Right>
-           
+
           </Header>
 
           <ProgressDialog
           visible={this.state.progressVisible}
-          title=" Fetching Data"
-          message="Please wait..."
+          title="Buscando dados"
+          message="por favor, espere..."
         />
 
           <View style={[styles.SearchHeader]}>
@@ -392,36 +374,36 @@ mainExample (number, title) {
                     <Input style={[styles.fontSize12]}
                        value={this.state.searchText}
                        onChangeText={this.handleOTP}
-                    placeholder="Pesquisar" />  
-                </Item> 
+                    placeholder="Pesquisar" />
+                </Item>
           </View>
-          
 
-        
+
+
            <View style={styles.flexRow}>
              {/* <Text>Immmm</Text> */}
            <Tabs  selectedIndex={selectedTab} TabSwitch={this.TabSwitch}  values={this.state.CategoryName}/>
 
-           
+
 
            </View>
-        
+
                     {
                           (this.state.Images)?
                           <ScrollView
-                          
+
                           scrollEventThrottle={200}
                           directionalLockEnabled={true}
                           >
                             { example1 }
-                          
+
                           </ScrollView>:null
-                    } 
+                    }
 
         {/* Deal of the day */}
-       
-       
-       
+
+
+
         <ProgressLoader
                 visible={this.state.visible}
                 isModal={true} isHUD={true}
@@ -431,43 +413,43 @@ mainExample (number, title) {
 
 
         {/* Offers for You */}
-      
-    
+
+
           <View>
           {
               (this.state.Result.length!=0)?
           <List style={[styles.marginT5,styles.marginLR5]}>
          {
-         
-         this.state.Result.map( (x,i) => 
+
+         this.state.Result.map( (x,i) =>
          (
-          //  console.log("Tittle:",x.title);  // value={x.id}  />
+          // console.log("Tittle:",x.title);  // value={x.id}  />
             // console.log("images:",x.images),
-            
+
           //  console.log("min_price:",x.min_price);
-          //  console.log("short_desc:",x.short_desc); 
+          //  console.log("short_desc:",x.short_desc);
           //  console.log("id:",x.id);
           //  console.log("Tittle:",x.title);
-         
+
            <ListItem thumbnail onPress={()=> this.props.navigation.navigate('OfferDetail',{itemId:x.id})}>
            <Left style={[]}>
            <Image style={{height:65,width:80}} source={{uri:x.images}} />
            {/* <Image style={{height:65,width:80}} source={require('./../../../assets/images/2.jpg')} /> */}
-                    
+
            </Left>
            <Body>
              <Text style={[styles.fontSize14,styles.colorGrey,styles.fontWeight500]}>{x.title}</Text>
              <Text  style={[styles.fontSize13]} note numberOfLines={2}>{x.short_desc} </Text>
-             <View style={[styles.flexRow]} note numberOfLines={1}> 
+             <View style={[styles.flexRow]} note numberOfLines={1}>
                   {/* <Text style={[styles.fontSize13,styles.colorGrey]}>deR</Text> */}
                     <Text  style={[styles.colorGrey,styles.fontSize13,styles.LineThrough]} note numberOfLines={1}> deR$ {x.min_price}</Text>
-                    
+
 
                   {/* <Text style={[styles.fontSize13,styles.colorGrey,styles.LineThrough]}> poR</Text> */}
                     <Text  style={[styles.colorGreen,styles.fontSize14,styles.fontWeight500]} note numberOfLines={1}>  poR$ {x.max_price}</Text>
-              
+
              </View>
-            
+
            </Body>
            <Right>
                  <Button  transparent>
@@ -475,18 +457,18 @@ mainExample (number, title) {
                       (this.state.AddRemove2)? <Image style={{height:35,width:35}} source={require('./../../../assets/Fruits/Fruits/pluse.png')} />
                        :<Image style={{height:25,width:25}} source={require('./../../../assets/like.png')} />
                     }
-                    
+
                      </Button>
            </Right>
    </ListItem>
 
 
           ))
-        
+
 
 
   }
-         
+
 
 
 
@@ -494,17 +476,17 @@ mainExample (number, title) {
             {/* <ListItem thumbnail onPress={()=> this.props.navigation.navigate('Account')}>
                     <Left style={[]}>
                     <Image style={{height:65,width:80}} source={require('./../../../assets/images/2.jpg')} />
-                    
+
                     </Left>
                     <Body>
                       <Text style={[styles.fontSize14,styles.colorGrey,styles.fontWeight500]}>Restaurante Miyoshi</Text>
                       <Text  style={[styles.fontSize13]} note numberOfLines={2}>Buffet de Sushi Livre com pratos Queents e Hots </Text>
-                      <View style={[styles.flexRow]} note numberOfLines={1}> 
+                      <View style={[styles.flexRow]} note numberOfLines={1}>
                       <Text style={[styles.fontSize13,styles.colorGrey,styles.marginR10]}>a partri de</Text>
                         <Text  style={[styles.colorGreen,styles.fontSize13]} note numberOfLines={1}>R$ 15</Text>
-                       
+
                       </View>
-                     
+
                     </Body>
                     <Right>
                           <Button  transparent>
@@ -512,7 +494,7 @@ mainExample (number, title) {
                                (this.state.AddRemove2)? <Image style={{height:35,width:35}} source={require('./../../../assets/Fruits/Fruits/pluse.png')} />
                                 :<Image style={{height:25,width:25}} source={require('./../../../assets/like.png')} />
                              }
-                             
+
                               </Button>
                     </Right>
             </ListItem>
@@ -520,17 +502,17 @@ mainExample (number, title) {
             <ListItem thumbnail onPress={()=> this.props.navigation.navigate('Account')}>
                     <Left style={[]}>
                     <Image style={{height:65,width:80}} source={require('./../../../assets/images/3.png')} />
-                    
+
                     </Left>
                     <Body>
                       <Text style={[styles.fontSize14,styles.colorGrey,styles.fontWeight500]}>Restaurante Miyoshi</Text>
                       <Text  style={[styles.fontSize13]} note numberOfLines={2}>Buffet de Sushi Livre com pratos Queents e Hots </Text>
-                      <View style={[styles.flexRow]} note numberOfLines={1}> 
+                      <View style={[styles.flexRow]} note numberOfLines={1}>
                       <Text style={[styles.fontSize13,styles.colorGrey,styles.marginR10]}>a partri de</Text>
                         <Text  style={[styles.colorGreen,styles.fontSize13]} note numberOfLines={1}>R$ 15</Text>
-                       
+
                       </View>
-                     
+
                     </Body>
                     <Right>
                           <Button  transparent>
@@ -538,7 +520,7 @@ mainExample (number, title) {
                                (this.state.AddRemove2)? <Image style={{height:35,width:35}} source={require('./../../../assets/Fruits/Fruits/pluse.png')} />
                                 :<Image style={{height:25,width:25}} source={require('./../../../assets/like1.png')} />
                              }
-                             
+
                               </Button>
                     </Right>
             </ListItem>
@@ -547,17 +529,17 @@ mainExample (number, title) {
             <ListItem thumbnail onPress={()=> this.props.navigation.navigate('Account')}>
                     <Left style={[]}>
                     <Image style={{height:65,width:80}} source={require('./../../../assets/images/4.jpg')} />
-                    
+
                     </Left>
                     <Body>
                       <Text style={[styles.fontSize14,styles.colorGrey,styles.fontWeight500]}>Restaurante Miyoshi</Text>
                       <Text  style={[styles.fontSize13]} note numberOfLines={2}>Buffet de Sushi Livre com pratos Queents e Hots </Text>
-                      <View style={[styles.flexRow]} note numberOfLines={1}> 
+                      <View style={[styles.flexRow]} note numberOfLines={1}>
                       <Text style={[styles.fontSize13,styles.colorGrey,styles.marginR10]}>a partri de</Text>
                         <Text  style={[styles.colorGreen,styles.fontSize13]} note numberOfLines={1}>R$ 15</Text>
-                       
+
                       </View>
-                     
+
                     </Body>
                     <Right>
                           <Button  transparent>
@@ -565,26 +547,26 @@ mainExample (number, title) {
                                (this.state.AddRemove2)? <Image style={{height:35,width:35}} source={require('./../../../assets/Fruits/Fruits/pluse.png')} />
                                 :<Image style={{height:25,width:25}} source={require('./../../../assets/like1.png')} />
                              }
-                             
+
                               </Button>
                     </Right>
             </ListItem> */}
 
              </List>:<View style={[styles.alignCenter,styles.ValignBottom,styles.marginT40]}>
-                <Image style={[styles.ValignBottom,styles.HW80,styles.alignCenter]} source={require('./../../../assets/box.png')} /> 
+                <Image style={[styles.ValignBottom,styles.HW80,styles.alignCenter]} source={require('./../../../assets/box.png')} />
                 <Text style={[styles.fontWeight500,styles.alignCenter,styles.marginT20,styles.colorGreen,styles.fontSize18]}>Dados Não Econtrados </Text>
                 </View>
           }
     </View>
 
-          
-      
+
+
 
         {/* ---------End------- Offers for You */}
 
-       
+
        </ScrollView>
-       
+
        <Footer style={[styles.bgColorWhite,styles.borderTop]}>
           <FooterTab style={[styles.bgColorWhite]}>
             <Button onPress={()=> this.props.navigation.navigate('Dashboard')}>
@@ -593,18 +575,18 @@ mainExample (number, title) {
             <Button  onPress={()=> this.props.navigation.navigate('Coupons')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/coupon.png')} />
             </Button>
-        
+
             <Button  onPress={()=> this.props.navigation.navigate('offers')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/offer.png')} />
             </Button>
-            
+
             <Button onPress={()=> this.props.navigation.navigate('Account1')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/user.png')} />
             </Button>
           </FooterTab>
-          </Footer> 
+          </Footer>
         </Container>
-      
+
     );
   }
 }

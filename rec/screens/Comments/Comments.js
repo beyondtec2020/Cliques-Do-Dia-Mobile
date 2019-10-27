@@ -31,6 +31,9 @@ import {
 } from 'native-base';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Rating, AirbnbRating } from 'react-native-ratings';
+import axios from 'axios';
+import { baseURL } from '../../../app.config';
+
 // import Icon from '@expo/vector-icons/Ionicons';
 const IS_ANDROID = Platform.OS === 'android';
 const IS_IOS = Platform.OS === 'ios';
@@ -108,14 +111,14 @@ async componentDidMount() {
 
   console.log("id-----",itemId);
 this.FetchReviews(itemId);
- 
+
 }
 
 FetchReviews(itemId){
 
-  const url="https://www.cliquesdodia.com.br/api/single-post?id="+itemId;
-          
-    
+  const url=`${baseURL}/single-post?id=${itemId}`
+
+
       fetch(url)
       .then(response => response.json())
       .then((responseJson)=> {
@@ -123,47 +126,49 @@ FetchReviews(itemId){
         Result: responseJson.data,
         });
         console.log("Result: ",this.state.Result);
-      
+
         console.log("reviews: ",this.state.Result.review.all_reviews);
-      
+
         this.setState({
           progressVisible: false,
         });
-      
+
       })
       .catch(error=>console.log(error)) //to catch the errors if any
-      
+
 }
 
 PostReview(){
-  
+
   console.log("Posttttttttt",this.state.token);
-const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'/post-review'
-  fetch(URL, 
-  {
-    method: 'POST',  
+  const URL= `${baseURL}/user/offer/${this.state.ItemId}/post-review`
+
+  axios.post(URL,
+    JSON.stringify({
+      title:this.state.Review,
+      review:this.state.Review,
+      rating:this.state.Ratings
+    }),
+    {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + this.state.token,
     },
-    body: JSON.stringify({
-      title:this.state.Review,
-      review:this.state.Review,
-      rating:this.state.Ratings
-    })
   })
-  .then(response => response.json())
   .then((responseJson)=> {
     // alert(responseJson.status);
-    // alert(JSON.stringify(responseJson));
-   console.log(responseJson);
-   this.setState({ Review:''})
-   this.FetchReviews(this.state.ItemId);
+    alert(JSON.stringify(responseJson.data.message.replace("", '')));
+   // console.log(responseJson);
+   // this.setState({ Review:''})
+   // this.FetchReviews(this.state.ItemId);
     //  alert("Offer Created Successfully.")
     // this.props.navigation.navigate('offers');
   })
-  .catch(error=>alert(JSON.stringify(error))) //to catch the errors if any
+  .catch(error => {
+    debugger;
+    alert(JSON.stringify(error))
+  }) //to catch the errors if any
 
 
 
@@ -177,28 +182,28 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
 
 
   render() {
-    
+
     if(IS_ANDROID){
       StatusBar.setBackgroundColor("rgba(0,0,0,0.2)")
       StatusBar.setBarStyle("light-content")
       StatusBar.setTranslucent(true)
     }
-   
+
     const starStyle = {
       width: 100,
       height: 20,
       marginBottom: 20,
     };
-   
+
     // console.log(getStatusBarHeight());
     return (
-     
+
         <Container style={[styles.bgcolorGray]}>
-        
+
           <Header searchBar rounded style={[MyWorkoutsStyle.header]} >
               <Left  style={[styles.headerLeft]}>
-                <Button  onPress={()=>this.props.navigation.pop(1)} 
-               
+                <Button  onPress={()=>this.props.navigation.pop(1)}
+
                 transparent>
                    <Image style={{height:20,width:20}} source={require('./../../../assets/back.png')} />
                 </Button>
@@ -210,15 +215,15 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
               {/* <Image style={{height:25,width:25}} source={require('./../../../assets/Timeline/edit.png')} /> */}
               </Right>
           </Header>
-        
+
 
 
         <ScrollView keyboardShouldPersistTaps={'always'} >
 
-        
+
         <Card transparent>
             <CardItem cardBody>
-           
+
                 <View  style={[styles.width100p,styles.marginB20,styles.containerMain]}>
                    <AirbnbRating
                         onFinishRating={(rating)=>this.ratingCompleted(rating)}
@@ -228,7 +233,7 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
                         defaultRating={0}
                         size={25}
                       />
-                        
+
                 </View>
 
             </CardItem>
@@ -236,35 +241,35 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
 
 
             <CardItem cardBody>
-             
+
                 <Item regular style={[styles.width100p,styles.marginT20]}>
-               
+
                          <Thumbnail  style={[styles.marginL10]} small source={require('./../../../assets/MyWorkouts/2.png')} />
                     <Input style={styles.inputComment}
                     value={this.state.Review}
                     onChangeText={(Review) => this.setState({ Review })}
                     placeholder='Deixe seus pensamentos...'
-                    placeholderTextColor="#B6B6B6" 
-                    
+                    placeholderTextColor="#B6B6B6"
+
                     />
-                    <TouchableOpacity onPress={()=> this.PostReview()} > 
-                        <Text 
+                    <TouchableOpacity onPress={()=> this.PostReview()} >
+                        <Text
                         style={[styles.colorGreen,styles.fontWeight500,styles.fontSize16,styles.marginLR15]}>
     postá-lo</Text>
-                
+
                     </TouchableOpacity>
-                  
+
                 </Item>
-           
+
             </CardItem>
           </Card>
 
 
-           
+
 
           {
-              (this.state.Result.length!=0)? 
-         this.state.Result.review.all_reviews.map( (x,i) => 
+              (this.state.Result.length!=0)?
+         this.state.Result.review.all_reviews.map( (x,i) =>
          (
         <Card transparent>
             <CardItem cardBody>
@@ -272,14 +277,14 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
                     <Thumbnail small source={{uri:x.user_profile}} />
                     <Body style={[ styles.Width60p,]}>
                       <Text style={[ styles.alignLeft,styles.marginL15,styles.fontSize14,styles.fontWeight500]}>{x.user_fname}</Text>
-                     
+
                       <Text style={[ styles.alignLeft,styles.marginT10,styles.colorBlack,styles.marginL15,styles.fontSize14]} note> {x.description}</Text>
-                    
+
                       <View style={[styles.flexRow,styles.alignLeft,styles.marginL10,styles.marginT5]}>
                          <Star score={x.rating} style={starStyle} />
                           <Text style={[styles.colorDarkGrey,styles.fontSize14,styles.fontWeight500]}> {x.rating}/5</Text>
                       </View>
-                     
+
                     </Body>
                     {/* <View style={[ styles.Width60p,styles.flexRow,]}>
                         <Text style={[styles.ValignTop,styles.colorGrey,styles.fontSize14,styles.paddingT5]}>1d ago</Text>
@@ -292,18 +297,18 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
           <Card transparent>
           <CardItem cardBody>
             <View style={[styles.flexRow,styles.marginTB10,styles.marginLR15]}>
-  
+
                   <Body style={[ styles.Width60p,]}>
-                   
+
                     <Text style={[ styles.alignLeft,styles.marginT10,styles.colorBlack,styles.marginL15,styles.fontSize14]} note> No Reviews</Text>
-                  
+
                   </Body>
             </View>
           </CardItem>
-        </Card> 
+        </Card>
         }
 
-{/* 
+{/*
 
           <Card transparent>
             <CardItem cardBody>
@@ -311,9 +316,9 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
                     <Thumbnail small source={require('./../../../assets/MyWorkouts/4.png')} />
                     <Body style={[ styles.Width60p,]}>
                       <Text style={[ styles.alignLeft,styles.marginL15,styles.fontSize14,styles.fontWeight500]}>maccza wodkav</Text>
-                     
+
                       <Text style={[ styles.alignLeft,styles.marginT10,styles.colorBlack,styles.marginL15,styles.fontSize14]} note>Good place.</Text>
-                    
+
                       <View style={[styles.flexRow,styles.alignLeft,styles.marginL10,styles.marginT5]}>
                          <Star score={4.2} style={starStyle} />
                           <Text style={[styles.colorDarkGrey,styles.fontSize14,styles.fontWeight500]}>  4.2/5</Text>
@@ -333,9 +338,9 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
                     <Thumbnail small source={require('./../../../assets/MyWorkouts/3.png')} />
                     <Body style={[ styles.Width60p,]}>
                       <Text style={[ styles.alignLeft,styles.marginL15,styles.fontSize14,styles.fontWeight500]}>Liza Miryac</Text>
-                     
+
                       <Text style={[ styles.alignLeft,styles.marginT10,styles.colorBlack,styles.marginL15,styles.fontSize14]} note>One time place.</Text>
-                    
+
                       <View style={[styles.flexRow,styles.alignLeft,styles.marginL10,styles.marginT5]}>
                          <Star score={5} style={starStyle} />
                           <Text style={[styles.colorDarkGrey,styles.fontSize14,styles.fontWeight500]}>  5/5</Text>
@@ -355,9 +360,9 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
                     <Thumbnail small source={require('./../../../assets/MyWorkouts/4.png')} />
                     <Body style={[ styles.Width60p,]}>
                       <Text style={[ styles.alignLeft,styles.marginL15,styles.fontSize14,styles.fontWeight500]}>Liza Miryac</Text>
-                     
+
                       <Text style={[ styles.alignLeft,styles.marginT10,styles.colorBlack,styles.marginL15,styles.fontSize14]} note>That is not right, we have to  do it. we can't do like that please tell them we will go and do that.</Text>
-                    
+
                       <View style={[styles.flexRow,styles.alignLeft,styles.marginL10,styles.marginT5]}>
                          <Star score={1.1} style={starStyle} />
                           <Text style={[styles.colorDarkGrey,styles.fontSize14,styles.fontWeight500]}>  1.1/5</Text>
@@ -371,7 +376,7 @@ const URL= 'https://www.cliquesdodia.com.br/api/user/offer/'+this.state.ItemId+'
           </Card> */}
 
         </ScrollView>
-          
+
         </Container>
     );
   }

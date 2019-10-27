@@ -36,6 +36,8 @@ import {
   FooterTab
 } from 'native-base';
 import { ScrollView } from 'react-native-gesture-handler';
+import { baseURL } from '../../../app.config';
+
 // import Icon from '@expo/vector-icons/Ionicons';
 const IS_ANDROID = Platform.OS === 'android';
 const IS_IOS = Platform.OS === 'ios';
@@ -74,7 +76,7 @@ class offers extends Component {
 
 // async setupGoogleSignin() {
 //   try {
-  
+
 //     await GoogleSignin.configure({
 //       iosClientId: '266564509095-caq9m2s1kcuva38h4rt8qtn3d8nqq4q4.apps.googleusercontent.com',
 //       androidClientId:'266564509095-caq9m2s1kcuva38h4rt8qtn3d8nqq4q4.apps.googleusercontent.com',
@@ -99,7 +101,7 @@ class offers extends Component {
 //     scopes: ["profile", "email"]
 //   });}
 //   catch (error) {
-//     console.log("error:",error); 
+//     console.log("error:",error);
 //   }
 // }
 
@@ -147,10 +149,10 @@ TabSwitch = (index: number) => {
 //  this._configureGoogleSignIn();
 //  this._getCurrentUser();
 }
- 
+
 
 ConfirmDelete(id){
- 
+
 
   Alert.alert(
     'Excluir Aferta',
@@ -172,11 +174,11 @@ ConfirmDelete(id){
 onDelete(id){
   console.log("ondelete")
 
-const deleteurl="https://www.cliquesdodia.com.br/api/user/delete-ad/"+id;
-      
+const deleteurl=`${baseURL}/user/delete-ad/${id}`;
+
     fetch(deleteurl,
     {
-      method: 'POST',  
+      method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -190,12 +192,12 @@ const deleteurl="https://www.cliquesdodia.com.br/api/user/delete-ad/"+id;
     // });
     console.log("delete: ",responseJson);
     this.fetchData();
-    // this.state.Result.map( (x,i) => 
-    // {  
+    // this.state.Result.map( (x,i) =>
+    // {
     //   console.log("Tittle:",x.title);  // value={x.id}  />
     //  console.log("images type---------------:",x.images.toString());
     //   console.log("min_price:",x.min_price);
-    //   console.log("short_desc:",x.short_desc); 
+    //   console.log("short_desc:",x.short_desc);
     //   console.log("id:",x.id);
     //   console.log("Tittle:",x.title);
     // })
@@ -217,14 +219,14 @@ fetchData(){
 
 
 
-console.log("cat id----: ",this.state.selectedTabId)
-console.log("city id----: ",this.state.city_id);
-console.log("searchText id----: ",this.state.searchText);
+// console.log("cat id----: ",this.state.selectedTabId)
+// console.log("city id----: ",this.state.city_id);
+// console.log("searchText id----: ",this.state.searchText);
 
 
-// const url="https://www.cliquesdodia.com.br/public_html/api/api/coupons?coupon_status="+this.state.selectedTabId;
-        
-  
+// const url="http://10.0.2.2:8000/public_html/api/api/coupons?coupon_status="+this.state.selectedTabId;
+
+
 // fetch(url)
 // .then(response => response.json())
 // .then((responseJson)=> {
@@ -233,12 +235,12 @@ console.log("searchText id----: ",this.state.searchText);
 //   });
 //   console.log("Result: ",this.state.Result);
 
-//   // this.state.Result.map( (x,i) => 
-//   // {  
+//   // this.state.Result.map( (x,i) =>
+//   // {
 //   //   console.log("Tittle:",x.title);  // value={x.id}  />
 //   //  console.log("images type---------------:",x.images.toString());
 //   //   console.log("min_price:",x.min_price);
-//   //   console.log("short_desc:",x.short_desc); 
+//   //   console.log("short_desc:",x.short_desc);
 //   //   console.log("id:",x.id);
 //   //   console.log("Tittle:",x.title);
 //   // })
@@ -249,9 +251,9 @@ console.log("searchText id----: ",this.state.searchText);
 // })
 // .catch(error=>console.log(error)) //to catch the errors if any
 
-fetch(`https://www.cliquesdodia.com.br/api/user/offers?user_id=me`,
+fetch(`${baseURL}/user/offers?user_id=me`,
   {
-    method: 'GET',  
+    method: 'GET',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -265,12 +267,12 @@ fetch(`https://www.cliquesdodia.com.br/api/user/offers?user_id=me`,
   });
   console.log("Offers: ",responseJson);
 
-  // this.state.Result.map( (x,i) => 
-  // {  
+  // this.state.Result.map( (x,i) =>
+  // {
   //   console.log("Tittle:",x.title);  // value={x.id}  />
   //  console.log("images type---------------:",x.images.toString());
   //   console.log("min_price:",x.min_price);
-  //   console.log("short_desc:",x.short_desc); 
+  //   console.log("short_desc:",x.short_desc);
   //   console.log("id:",x.id);
   //   console.log("Tittle:",x.title);
   // })
@@ -314,10 +316,10 @@ componentWillUnmount () {
     }
     // console.log(getStatusBarHeight());
     return (
-     
+
         <Container>
-         
-         
+
+
          <Header style={[styles.Mainheader]} >
           <Left  style={[styles.headerLeft]}>
           <Button onPress={()=> this.props.navigation.navigate('Dashboard')} transparent>
@@ -329,21 +331,21 @@ componentWillUnmount () {
 Ofertas</Text></Title>
           </Body>
           <Right style={[styles.headerRight]}>
-         
+
           <TouchableOpacity style={[styles.ValignCenter]} onPress={()=> this.props.navigation.navigate('CreateOffer')} >
              <Text style={[styles.colorWhite,styles.fontSize16]}> Criar Oferta </Text>
           </TouchableOpacity>
           </Right>
         </Header>
-    
-                   
-        
 
-       
+
+
+
+
             <ScrollView>
           {
               (this.state.Result!=null)?
-              this.state.Result.map( (x) => 
+              this.state.Result.map( (x) =>
               (
                 <Card style={[styles.marginLR5]}>
                   <CardItem cardBody>
@@ -367,20 +369,20 @@ Ofertas</Text></Title>
                                   <Text style={[styles.colorRed,styles.marginLR10,styles.Underline]}>excluir</Text>
                                 </TouchableOpacity>
                               </View>
-                            
+
                           </View>
                     </View>
                   </CardItem>
             </Card>
               ))
               :null
-    
+
           }
 
-       
+
 
 </ScrollView>
-       
+
      <Footer style={[styles.bgColorWhite,styles.borderTop]}>
           <FooterTab style={[styles.bgColorWhite]}>
             <Button onPress={()=> this.props.navigation.navigate('Dashboard')}>
@@ -389,7 +391,7 @@ Ofertas</Text></Title>
             <Button  onPress={()=> this.props.navigation.navigate('Coupons')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/coupon.png')} />
             </Button>
-        
+
             <Button  onPress={()=> this.props.navigation.navigate('offers')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/offer.png')} />
             </Button>
@@ -398,9 +400,9 @@ Ofertas</Text></Title>
             <Image style={[styles.icon20]} source={require('./../../../assets/user.png')} />
             </Button>
           </FooterTab>
-          </Footer> 
+          </Footer>
         </Container>
-    
+
     );
   }
 }

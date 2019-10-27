@@ -10,6 +10,7 @@ import {
   TouchableOpacity, TextInput, StyleSheet, Image, AsyncStorage, KeyboardAvoidingView
 } from 'react-native';
 
+import { baseURL } from '../../../app.config';
 import styles from '../../style/style';
 
 class Register extends Component {
@@ -33,9 +34,9 @@ class Register extends Component {
     // if(email==null||email==''||email==undefined)
     // {
     //   this.props.navigation.navigate("Login");
-    // } 
+    // }
   }
-  
+
   signup() {
     const { username, password, fname, lname, phone, cpassword } = this.state;
     if (username == '' || password == '' || fname == '' || lname == '' || phone == '' || cpassword == '') {
@@ -43,25 +44,25 @@ class Register extends Component {
     }
     else {
       this.setState({ progressVisible: true });
-      console.log("username:",typeof(this.state.username));
-      console.log("password:",typeof(this.state.password));
-      console.log("fname:",typeof(this.state.fname));
-      console.log("lname:",typeof(this.state.lname));
-      console.log("phone:",typeof(this.state.phone));
-      console.log("cpassword:",typeof(this.state.cpassword));
+      // console.log("username:",typeof(this.state.username));
+      // console.log("password:",typeof(this.state.password));
+      // console.log("fname:",typeof(this.state.fname));
+      // console.log("lname:",typeof(this.state.lname));
+      // console.log("phone:",typeof(this.state.phone));
+      // console.log("cpassword:",typeof(this.state.cpassword));
 
-      console.log("username:",this.state.username);
-      console.log("password:",this.state.password);
-      console.log("fname:",this.state.fname);
-      console.log("lname:",this.state.lname);
-      console.log("phone:",this.state.phone);
-      console.log("cpassword:",this.state.cpassword);
-   
+      // console.log("username:",this.state.username);
+      // console.log("password:",this.state.password);
+      // console.log("fname:",this.state.fname);
+      // console.log("lname:",this.state.lname);
+      // console.log("phone:",this.state.phone);
+      // console.log("cpassword:",this.state.cpassword);
+
       // const encodedValue1 = encodeURIComponent(this.state.username);
       // const encodedValue2 = encodeURIComponent(this.state.password);
-    
+
       //  fetch(`http://168.187.116.75/kbiecapp/api/values/login?id=${encodedValue1}&pwd=${encodedValue2}`)
-      fetch(`https://www.cliquesdodia.com.br/api/new-profile`, {
+      fetch(`${baseURL}/new-profile`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -78,7 +79,7 @@ class Register extends Component {
       })
       .then(response => response.json())
       .then((responseJson)=> {
-        console.log(responseJson);
+        // console.log(responseJson);
         this.setState({
           result: responseJson,
           progressVisible: false,
@@ -88,11 +89,11 @@ class Register extends Component {
           alert('Registration succeed');
           // AsyncStorage.setItem('username',this.state.username);
           // AsyncStorage.setItem('password',this.state.password);
- 
+
           // AsyncStorage.setItem('email',this.state.result.user.email);
           // AsyncStorage.setItem('first_name',this.state.result.user.first_name);
           // AsyncStorage.setItem('phone',this.state.result.user.phone);
-        
+
           // console.log(this.state.result.user.email);
           // console.log(this.state.result.user.first_name);
           // console.log(this.state.result.user.phone);
@@ -101,7 +102,7 @@ class Register extends Component {
           this.setState({ progressVisible: false });
         }
         else {
-          console.log(this.state.result.message.email);
+          // console.log(this.state.result.message.email);
           alert(this.state.result.message.email);
           this.setState({ progressVisible: false });
         }
@@ -113,7 +114,7 @@ class Register extends Component {
   managePasswordVisibility = _ => {
     this.setState({ hidePassword: !this.state.hidePassword });
   }
-  
+
   render() {
     return (
       <KeyboardAvoidingView keyboardVerticalOffset={100} style={styles.container} enabled>
@@ -127,10 +128,10 @@ class Register extends Component {
           <Text style={[styles.fontSize25,styles.alignCenter,styles.marginT45,styles.colorGreen]}>Novo Cadastro</Text>
           <View  style={[styles.marginLR30,styles.marginT45]}>
             <Item >
-              <Input style={[styles.fontSize16]} placeholder="Primeiro Nome" 
-                autoCapitalize="none" 
-                autoCorrect={false} 
-                keyboardType='email-address' 
+              <Input style={[styles.fontSize16]} placeholder="Primeiro Nome"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType='email-address'
                 returnKeyType="next"
                 value={this.state.fname}
                 onChangeText={(fname) => this.setState({ fname })}
@@ -142,10 +143,10 @@ class Register extends Component {
             <Item>
               <Input
                 style={[styles.fontSize16]}
-                placeholder="Segundo Nome" 
-                autoCapitalize="none" 
-                autoCorrect={false} 
-                keyboardType='email-address' 
+                placeholder="Segundo Nome"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType='email-address'
                 returnKeyType="next"
                 value={this.state.lname}
                 onChangeText={(lname) => this.setState({ lname })}
@@ -157,10 +158,10 @@ class Register extends Component {
             <Item >
               <Input
                 style={[styles.fontSize16]}
-                placeholder="Email" 
-                autoCapitalize="none" 
-                autoCorrect={false} 
-                keyboardType='email-address' 
+                placeholder="Email"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType='email-address'
                 returnKeyType="next"
                 value={this.state.username}
                 onChangeText={(username) => this.setState({ username })}
@@ -171,29 +172,29 @@ class Register extends Component {
           <View style={[styles.marginLR30]}>
             <Item >
               <Input
-                style={[styles.fontSize16]} placeholder="Telefone" 
-                autoCapitalize="none" 
-                autoCorrect={false} 
-                keyboardType='number-pad' 
+                style={[styles.fontSize16]} placeholder="Telefone"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType='number-pad'
                 returnKeyType="next"
                 value={this.state.phone}
                 onChangeText={(phone) => this.setState({ phone })}
               />
             </Item>
           </View>
-        
+
           <View style={[styles.marginLR30]}>
             <Item>
-              <Input placeholder="Senha" 
+              <Input placeholder="Senha"
                 value={this.state.password}
                 onChangeText={(password) => this.setState({ password })}
                 secureTextEntry={true}
               />
             </Item>
-            
+
             <Item >
               <Input
-                placeholder="Confirmar Senha" 
+                placeholder="Confirmar Senha"
                 value={this.state.cpassword}
                 onChangeText={(cpassword) => this.setState({ cpassword })}
                 secureTextEntry={true}

@@ -1,8 +1,22 @@
 import React, { Component } from 'react';
-import { TouchableOpacity, TextInput,StyleSheet,Image,AsyncStorage } from 'react-native';
-import styles from './../../style/style';
-import { ProgressDialog } from 'react-native-simple-dialogs';
+import {
+  TouchableOpacity, TextInput, StyleSheet, Image, AsyncStorage
+} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
+import { ProgressDialog } from 'react-native-simple-dialogs';
+import { LoginButton, AccessToken,LoginManager } from 'react-native-fbsdk';
+import { GoogleSignin, GoogleSigninButton, statusCodes} from 'react-native-google-signin';
+import axios from 'axios';
+import {
+  Container, Header, Button,
+  View, Item, Text,
+  Body, Icon, Form,
+  Input, Label, Title,
+} from 'native-base';
+
+import { baseURL } from '../../../app.config';
+import styles from './../../style/style';
+
 const options = {
   title: 'Select Image',
   storageOptions: {
@@ -10,143 +24,74 @@ const options = {
     path: 'images',
   },
 };
- 
-import { LoginButton, AccessToken,LoginManager } from 'react-native-fbsdk';
-import { GoogleSignin, GoogleSigninButton ,statusCodes} from 'react-native-google-signin';
-GoogleSignin.configure({scopes: ['email', 'profile'],offlineAccess:true,iosClientId:'952081920236-bo28tuhcnf4qr9s00tv0qmithclc5dop.apps.googleusercontent.com',webClientId:'952081920236-3v6tnd6jjk8v44bm9g08vd3odfdss42t.apps.googleusercontent.com'});
-import {
-  Container,
-  Header,
-  Button,
-  View,
-  Item,
-  Text,
-  Body,
-  Icon,
-  Form,
-  Input,  
-  Label,
-  Title,
-} from 'native-base';
+
+GoogleSignin.configure({
+  scopes: ['email', 'profile'],
+  offlineAccess:true,
+  iosClientId:'952081920236-bo28tuhcnf4qr9s00tv0qmithclc5dop.apps.googleusercontent.com',
+  webClientId:'952081920236-3v6tnd6jjk8v44bm9g08vd3odfdss42t.apps.googleusercontent.com'
+});
+
+
 class Login extends Component {
-  constructor()
-  {
-    super();
-    this.state = { hidePassword: true,
-      username: '',
-      password: '',
-    result:''
+  state = {
+    hidePassword: true,
+    username: '',
+    password: '',
+    result: ''
+  }
+
+  async componentDidMount() {
+    this.setState({ token:  await AsyncStorage.getItem('token') });
+
+
+    if (this.state.token == null || this.state.token == '' || this.state.token == undefined) {
+      LoginManager.logOut();
+    }
+    else {
+      this.props.navigation.navigate("Dashboard");
     }
   }
 
-  async componentDidMount(){
+  login = _ => {
+    const { username, password } = this.state;
 
-    this.setState({
-      token:  await AsyncStorage.getItem("token"),
-    });
-  
-     
-        console.log("token in Login:",this.state.token);
-        // console.log("idddddd:",email);
-          
-    if(this.state.token==null||this.state.token==''||this.state.token==undefined)
-    {
-      console.log(" Null");
-      LoginManager.logOut();
-    } 
-    else{
-      this.props.navigation.navigate("Dashboard");
+    if (username == '' || password == '') {
+      alert('Please enter username password');
     }
-}
-  login() {
+    else {
+      this.setState({ progressVisible: true });
+      //  fetch(`http://168.187.116.75/kbiecapp/api/values/login?id=${encodedValue1}&pwd=${encodedValue2}`)
 
-   
-    // ImagePicker.showImagePicker(options, (response) => {
-    //   console.log('Response = ', response);
-     
-    //   if (response.didCancel) {
-    //     console.log('User cancelled image picker');
-    //   } else if (response.error) {
-    //     console.log('ImagePicker Error: ', response.error);
-    //   } else if (response.customButton) {
-    //     console.log('User tapped custom button: ', response.customButton);
-    //   } else {
-    //     const source = { uri: response.uri };
-     
-    //     console.log('path------------',source);
+      axios.defaults.headers.post['Accept'] = 'application/json';
 
-        // You can also display the image using data:
-        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
-     
-       
-    //   }
-    // });
-
-    if(this.state.username=="" || this.state.password=="")
-    {
-      alert("Please enter username password");
-    }
-    else{
-
-     this.setState({
-      progressVisible: true,
-    });
-    console.log("username:",this.state.username);
-    console.log("password:",this.state.password);
-
-   
-//  fetch(`http://168.187.116.75/kbiecapp/api/values/login?id=${encodedValue1}&pwd=${encodedValue2}`)
-fetch(`https://www.cliquesdodia.com.br/api/login`, {
-                              method: 'POST',
-                              headers: {
-                                Accept: 'application/json',
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({
-                                email: this.state.username,
-                                password:this.state.password,
-                             
-                              }),
-                            })
-    .then(response => response.json())
-    .then((responseJson)=> {
-     console.log(responseJson);
-     this.setState({
-      result: responseJson,
-      // loading: false,
-     });
-       
-     
-   
-
-       if(this.state.result.status==true)
-       {
-        alert("Login Successfully");
-
-
-        AsyncStorage.clear();
-
-         console.log('token',this.state.result.access_token);
-        AsyncStorage.setItem('token',this.state.result.access_token);
-       
+      axios.post(`${baseURL}/login`, {
+        email: username,
+        password: password,
+      })
+      .then((responseJson)=> {
         this.setState({
-          progressVisible: false,
+          result: responseJson,
+          // loading: false,
         });
 
-        this.props.navigation.navigate('Dashboard');
-     
-       }
-       else{
-        alert(this.state.result.message);
-        this.setState({
-          progressVisible: false,
-        });
-       }
-         
-    })
+        if (this.state.result.status) {
+          AsyncStorage.clear();
 
-    .catch(error=>alert(error)) //to catch the errors if any
-      }
+          AsyncStorage.setItem('token', responseJson.data.access_token);
+
+          this.setState({ progressVisible: false });
+
+          this.props.navigation.navigate('Dashboard');
+        }
+        else {
+          this.setState({ progressVisible: false });
+        }
+      })
+      .catch(error => {
+        this.setState({ progressVisible: false });
+      })
+    }
   }
 
   _signIn = async () => {
@@ -154,25 +99,23 @@ fetch(`https://www.cliquesdodia.com.br/api/login`, {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       // alert(JSON.stringify(userInfo))
-      // alert(JSON.stringify(userInfo.user.email)); 
-      // alert(userInfo.user.email+''+userInfo.user.id+''+userInfo.user.name); 
-      // alert(userInfo.user.id); 
-      // alert(userInfo.user.name); 
-        
+      // alert(JSON.stringify(userInfo.user.email));
+      // alert(userInfo.user.email+''+userInfo.user.id+''+userInfo.user.name);
+      // alert(userInfo.user.id);
+      // alert(userInfo.user.name);
+
       this.setState({ userInfo });
 
-
-
-      fetch(`https://www.cliquesdodia.com.br/api/login/google`, 
+      fetch(`${baseURL}/login/google`,
       {
-        method: 'POST',  
+        method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           google_id:userInfo.user.id,
-          email:userInfo.user.email, 
+          email:userInfo.user.email,
           first_name:userInfo.user.name,
           last_name:userInfo.user.name
         })
@@ -185,24 +128,16 @@ fetch(`https://www.cliquesdodia.com.br/api/login`, {
 
       AsyncStorage.clear();
      AsyncStorage.setItem('token',responseJson.access_token);
-     alert("Login Successfully");
+     // alert("Login Successfully");
      this.props.navigation.navigate('Dashboard');
         // alert("Offer Created Successfully.")
         // this.props.navigation.navigate('offers');
       })
-      .catch(error=>alert(JSON.stringify(error))) //to catch the errors if any
-    
-     
-
-
-
-
-
-
+      .catch(error=>console.log(JSON.stringify(error))) //to catch the errors if any
 
       // this.props.navigation.navigate('Dashboard');
     } catch (error) {
-      alert(JSON.stringify(error))
+      // alert(JSON.stringify(error))
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
       } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -214,23 +149,23 @@ fetch(`https://www.cliquesdodia.com.br/api/login`, {
       }
     }
   };
-  
+
   initUser(token) {
     fetch('https://graph.facebook.com/v3.2/me?fields=email,name&access_token=' + token)
     .then((response) => response.json())
     .then((json) => {
-     
+
 
       // Some user object has been set up somewhere, build that user here
-      // alert(JSON.stringify(json))   
-      // alert(JSON.stringify(json));  
-      //  alert(JSON.stringify(json));     
-      //  alert(JSON.stringify(json.id));     
+      // alert(JSON.stringify(json))
+      // alert(JSON.stringify(json));
+      //  alert(JSON.stringify(json));
+      //  alert(JSON.stringify(json.id));
 
 
-       fetch(`https://www.cliquesdodia.com.br/api/login/fb`, 
+       fetch(`${baseURL}/login/fb`,
        {
-         method: 'POST',  
+         method: 'POST',
          headers: {
            Accept: 'application/json',
            'Content-Type': 'application/json',
@@ -246,135 +181,105 @@ fetch(`https://www.cliquesdodia.com.br/api/login`, {
          // alert(responseJson.status);
           // alert(JSON.stringify(responseJson));
         // alert(responseJson.access_token);
- 
+
        AsyncStorage.clear();
       AsyncStorage.setItem('token',responseJson.access_token);
-      alert("Login Successfully");
+      // alert("Login Successfully");
       this.props.navigation.navigate('Dashboard');
          // alert("Offer Created Successfully.")
          // this.props.navigation.navigate('offers');
        })
-       .catch(error=>alert(JSON.stringify(error))) //to catch the errors if any
+       .catch(error=>console.log(JSON.stringify(error))) //to catch the errors if any
     })
     .catch(() => {
       reject('ERROR GETTING DATA FROM FACEBOOK')
     })
   }
 
-  
-    render() {
-      return (
-        <Container>
-                  <ProgressDialog
+  render() {
+    return (
+      <Container>
+        <ProgressDialog
           visible={this.state.progressVisible}
-          title=" Fetching Data"
-          message="Please wait..."
+          title="Buscando dados"
+          message="por favor, espere..."
         />
-                   
-                   <View style={[styles.ValignCenter]}>
-                     <Text style={[styles.fontSize25,styles.alignCenter,styles.colorGreen]}>Sign In</Text>
-                   <View  style={[styles.marginLR15,styles.marginT45]}>
-                     <Item >
-                      <Input style={[styles.fontSize16]} placeholder="Username" 
-                       autoCapitalize="none" 
-                       onSubmitEditing={() => this.passwordInput.focus()} 
-                       autoCorrect={false} 
-                       keyboardType='email-address' 
-                       returnKeyType="next"
-                       value={this.state.username}
-                       onChangeText={(username) => this.setState({ username })}
-                      
-                      />
-                    </Item>
-                </View>
-        
-                <View  style={[styles.marginLR15]}>
 
+        <View style={[styles.ValignCenter]}>
+          <Text style={[styles.fontSize25,styles.alignCenter,styles.colorGreen]}>Sign In</Text>
+          <View  style={[styles.marginLR15,styles.marginT45]}>
+            <Item >
+              <Input style={[styles.fontSize16]} placeholder="Username"
+                autoCapitalize="none"
+                onSubmitEditing={() => this.passwordInput.focus()}
+                autoCorrect={false}
+                keyboardType='email-address'
+                returnKeyType="next"
+                value={this.state.username}
+                onChangeText={(username) => this.setState({ username })}
+              />
+            </Item>
+          </View>
 
+          <View  style={[styles.marginLR15]}>
+            <Item >
+              <Input placeholder="Password"
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry={true}
+                value={this.state.password}
+                onChangeText={(password) => this.setState({ password })}
+              />
+            </Item>
+          </View>
 
-                <Item >
+          <View  style={[styles.marginLR15,styles.marginTB10]}>
+            {/* <Button  style={[styles.alignRight]} transparent><Text uppercase={false} style={[styles.fontSize12,styles.colorDarkGrey]}>Forgot Password?</Text></Button> */}
+          </View>
 
+          <View  style={[styles.marginLR15,styles.marginTB15]}>
+            <Button onPress={this.login} block style={styles.BackgroundGreen}>
+              <Text uppercase={false}>Sign In</Text>
+            </Button>
+          </View>
 
+          <LoginButton
+            readPermissions = {['public_profile']}
+            style = {{ height: 30, marginLeft:15, marginRight:15 }}
+            onLoginFinished = {(error, result) => {
+              if (error) {
+                //alert(error)
+              } else if (result.isCancelled) {
+                // console.log("login is cancelled.");
+              } else {
+                AccessToken.getCurrentAccessToken().then(
+                  (data) => {
+                    //alert(data.accessToken.toString())
+                    this.initUser(data.accessToken.toString())
+                  }
+                )
+              }
+            }}
+            onLogoutFinished={() => console.log("logout.")}
+          />
 
-                      <Input placeholder="Password" 
-                       autoCapitalize="none" 
-                        autoCorrect={false} 
-                        secureTextEntry={true}
-                       value={this.state.password}
-                       onChangeText={(password) => this.setState({ password })}
-                      
-                      />
-                   
-          </Item>
-                </View>
-                <View  style={[styles.marginLR15,styles.marginTB10]}>
-                   
-                        {/* <Button  style={[styles.alignRight]} transparent><Text uppercase={false} style={[styles.fontSize12,styles.colorDarkGrey]}>Forgot Password?</Text></Button> */}
-                   
-                </View>
+          <GoogleSigninButton
+            style={{ marginLeft:10, marginRight:10, height: 40 }}
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={this._signIn}
+            disabled={this.state.isSigninInProgress}
+          />
 
-                <View  style={[styles.marginLR15,styles.marginTB15]}>
-                   
-                        <Button   onPress={this.login.bind(this)} block style={styles.BackgroundGreen}>
-                    <Text  uppercase={false}>Sign In</Text>
-                  </Button>
-                  
-              
-                </View>
-
-
-
-                  {/* ---------End------- Offers for You */}
-                  <LoginButton
-                  readPermissions={['public_profile']}
-                  style={{  height: 30,marginLeft:15,marginRight:15 }}
-                          onLoginFinished={
-                            (error, result) => {
-                              if (error) {
-                                //alert(error)
-                              } else if (result.isCancelled) {
-                                console.log("login is cancelled.");
-                              } else {
-                                AccessToken.getCurrentAccessToken().then(
-                                  (data) => {
-                                    //alert(data.accessToken.toString())
-                                    this.initUser(data.accessToken.toString())
-                                  }
-                                )
-                              }
-                            }
-                          }
-                          onLogoutFinished={() => console.log("logout.")}/>
-
-                      <GoogleSigninButton
-                        style={{ marginLeft:10,marginRight:10, height: 40 }}
-                        size={GoogleSigninButton.Size.Wide}
-                        color={GoogleSigninButton.Color.Dark}
-                        onPress={this._signIn}
-                        disabled={this.state.isSigninInProgress} />
-     
-
-
-
-
-                <View  style={[styles.marginLR15,styles.marginTB15]}>
-                   
-                   <Button transparent block  onPress={() => this.props.navigation.navigate('Register')} style={[styles.greenBorder]}>
-               <Text  style={[styles.colorGreen]}  uppercase={false}>Sign Up</Text>
-             </Button>
-             
-         
-           </View>
-
-         
-                
-
-                   </View>
-              
-        
-       
+          <View style={[styles.marginLR15,styles.marginTB15]} >
+            <Button transparent block onPress={() => this.props.navigation.navigate('Register')} style={[styles.greenBorder]}>
+              <Text style={[styles.colorGreen]}  uppercase={false}>Sign Up</Text>
+            </Button>
+          </View>
+        </View>
       </Container>
-      );
-    }
+    );
   }
-  export default Login;
+}
+
+export default Login;

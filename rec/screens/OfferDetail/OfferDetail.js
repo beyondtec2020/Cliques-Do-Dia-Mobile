@@ -30,6 +30,9 @@ import {
   Content,
 } from 'native-base';
 import { ScrollView } from 'react-native-gesture-handler';
+import axios from 'axios';
+import { baseURL } from '../../../app.config';
+
 // import Icon from '@expo/vector-icons/Ionicons';
 const IS_ANDROID = Platform.OS === 'android';
 const IS_IOS = Platform.OS === 'ios';
@@ -65,18 +68,18 @@ class OfferDetail extends Component {
 }
 
 ConfirmCoupon(){
- 
+
 
   Alert.alert(
-    'Coupon Generation',
-    'Are you sure?',
+    'Geração de Cupom',
+    'Você tem certeza?',
     [
       {
-        text: 'Cancel',
+        text: 'Cancelar',
         onPress: () => console.log('Cancel Pressed'),
         style: 'cancel',
       },
-      {text: 'Generate', onPress: () => this.GenerateCoupon()},
+      {text: 'Gerar', onPress: () => this.GenerateCoupon()},
     ],
     {cancelable: false},
   );
@@ -84,16 +87,17 @@ ConfirmCoupon(){
 }
 
 GenerateCoupon(){
+  // console.log(process.env);
 
 
 
-console.log("this.state.offer_id=",this.state.offer_id);
-  const URL="https://www.cliquesdodia.com.br/api/user/offer/"+this.state.offer_id+'/generate-coupon'
+// console.log("this.state.offer_id=",this.state.offer_id);
+  const URL=`${baseURL}/user/offer/${this.state.offer_id}/generate-coupon`
 
-          console.log("URL:",URL);
+          // console.log("URL:",URL);
       fetch(URL,
         {
-          method: 'POST',  
+          method: 'POST',
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -103,12 +107,13 @@ console.log("this.state.offer_id=",this.state.offer_id);
       .then(response => response.json())
       .then((responseJson)=> {
         this.setState({
-        CouponResult: responseJson,
+          CouponResult: responseJson,
         });
-        console.log("Result of coupon: ",this.state.CouponResult);
+        debugger;
+        // console.log("Result of coupon: ",this.state.CouponResult);
 
-        alert(this.state.CouponResult.message);
-      
+        // alert(this.state.CouponResult.message);
+
         this.setState({
           progressVisible: false,
         });
@@ -116,7 +121,7 @@ console.log("this.state.offer_id=",this.state.offer_id);
       })
       .catch(error=>console.log(error)) //to catch the errors if any
 
-            
+
 
 }
 
@@ -131,33 +136,33 @@ fetchData(){
     ItemId:itemId
   });
 
- 
 
-  console.log("id-----",itemId);
 
-const url="https://www.cliquesdodia.com.br/api/single-post?id="+itemId;
-        
-  
-fetch(url)
-.then(response => response.json())
+  // console.log("id-----",itemId);
+
+const url=`${baseURL}/single-post?id=${itemId}`;
+
+axios.get(url)
 .then((responseJson)=> {
-  this.setState({
-   Result: responseJson.data,
-   offer_id:responseJson.data.id
-  });
-  console.log("Result: ",this.state.Result);
+  if (responseJson.data) {
+    this.setState({
+      Result: responseJson.data.data,
+      offer_id:responseJson.data.data.id
+    });
+  }
+  // console.log("Result: ",this.state.Result);
 
-  console.log("image: ",this.state.Result.images);
-  console.log("short_desc: ",this.state.Result.short_desc);
+  // console.log("image: ",this.state.Result.images);
+  // console.log("short_desc: ",this.state.Result.short_desc);
 
 
 
-  // this.state.Result.map( (x,i) => 
-  // {  
+  // this.state.Result.map( (x,i) =>
+  // {
   //   console.log("Tittle:",x.title);  // value={x.id}  />
   //  console.log("images type---------------:",x.images.toString());
   //   console.log("min_price:",x.min_price);
-  //   console.log("short_desc:",x.short_desc); 
+  //   console.log("short_desc:",x.short_desc);
   //   console.log("id:",x.id);
   //   console.log("Tittle:",x.title);
   //})
@@ -166,7 +171,10 @@ fetch(url)
   });
 
 })
-.catch(error=>console.log(error)) //to catch the errors if any
+.catch(error => {
+  debugger;
+  console.log(error)
+}) //to catch the errors if any
 
 
 }
@@ -184,7 +192,7 @@ async componentDidMount(){
   render() {
 
 
-    
+
 
     if(IS_ANDROID){
       StatusBar.setBackgroundColor("rgba(0,0,0,0.2)")
@@ -198,16 +206,16 @@ async componentDidMount(){
       marginBottom: 20,
     };
     return (
-     
+
         <Container>
          <ScrollView>
-         
-       
+
+
 
          <Header style={[styles.Mainheader]} >
           <Left  style={[styles.headerLeft]}>
-          <Button  onPress={this.openDrawer} transparent>
-          <Image style={{height:18,width:20}} source={{url:this.state.Result.images}} />
+          <Button onPress={this.openDrawer}  transparent>
+          <Image style={{height:15,width:18}} source={require('./../../../assets/menu.png')} />
           </Button>
           </Left>
           <Body style={[styles.headerBody]}>
@@ -215,7 +223,7 @@ async componentDidMount(){
           </Body>
           <Right style={[styles.headerRight]}>
           <Image style={[styles.Icon20,styles.ValignCenter]} source={require('./../../../assets/star.png')} />
-           
+
           </Right>
         </Header>
 
@@ -234,7 +242,7 @@ async componentDidMount(){
             }}
         /> */}
 
-    
+
         <ProgressLoader
                 visible={this.state.visible}
                 isModal={true} isHUD={true}
@@ -244,32 +252,32 @@ async componentDidMount(){
         {/* <Image style={[styles.ProductBG]} source={require('./../../../assets/sliders/1.jpg')} /> */}
 {
   (this.state.Result.images)?
-        <ImageBackground  resizeMode="cover" style={[styles.ProductBG]} 
+        <ImageBackground  resizeMode="cover" style={[styles.ProductBG]}
         source={{uri:this.state.Result.images}}>
             <View style={[styles.paddingLR20,styles.paddingTB20,styles.ValignBottom,styles.bgColorBlack]}>
-          
+
                 <Text  style={[styles.marginTB20,styles.colorWhite,styles.ValignCenter,styles.fontSize25,styles.fontWeight500]}> {this.state.Result.title}</Text>
                 <Text  style={[styles.marginTB20,styles.colorWhite,styles.ValignCenter,styles.fontSize14,styles.fontWeight400]}>
                {this.state.Result.short_desc}
                   </Text>
-                  
-        <View style={[styles.flexRow,styles.marginT5]}> 
+
+        <View style={[styles.flexRow,styles.marginT5]}>
              <Text style={[styles.fontSize14,styles.colorGreen,styles.LineThrough]}> deR$ </Text>
              <Text style={[styles.fontSize16,styles.colorWhite,styles.LineThrough]}> {this.state.Result.min_price}</Text>
-             
+
              <Text style={[styles.fontSize14,styles.colorGreen]}>     porR$ </Text>
              <Text style={[styles.fontSize16,styles.colorWhite]}> {this.state.Result.max_price} </Text>
-            
+
 
         </View>
-  
+
             </View>
 
       </ImageBackground>
       :null
 }
             <View style={[styles.marginB10]}>
-            <Button 
+            <Button
                 onPress={()=> this.ConfirmCoupon()}
                 style={[styles.bgcolorLightGreen]} full>
                 <Text>Gerar Cupom</Text>
@@ -278,22 +286,22 @@ async componentDidMount(){
 
             <View style={[styles.marginT5,styles.marginB20,styles.marginLR15]}>
 
-            <View style={[styles.marginT5,styles.marginB20]}> 
+            <View style={[styles.marginT5,styles.marginB20]}>
                                   <Text  style={[styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}>Detalhes da Oferta:</Text>
                                   <Text  style={[styles.colorDarkGrey,styles.fontSize14]}>{this.state.Result.description}</Text>
 
                   </View>
 
-                  <View style={[styles.marginT5,styles.marginB20]}> 
+                  <View style={[styles.marginT5,styles.marginB20]}>
                                   <Text  style={[styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}> Dias Da Semana:</Text>
-                      
 
-            
+
+
 
                       <View style={[styles.flexRow,styles.flexWrap]}>
                       {
                         (this.state.Result.amenities)?
-                        this.state.Result.amenities.map( (x,i) => 
+                        this.state.Result.amenities.map( (x,i) =>
                          (
                           <View style={[styles.flexRow,styles.width49p,styles.marginT15,styles.marginL5]}>
                             <Image style={[styles.icon16]} source={require('./../../../assets/check.png')} />
@@ -317,11 +325,11 @@ async componentDidMount(){
                       </View> */}
 
 
-                    
 
-                    
 
-                      
+
+
+
                   </View>
 
 
@@ -329,7 +337,7 @@ async componentDidMount(){
 
 
 
-            <View style={[styles.marginT5]}> 
+            <View style={[styles.marginT5]}>
                <Text  style={[styles.marginL5,styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}>Classificação:</Text>
                 <View style={[styles.flexRow]}>
                      <Star score={this.state.Result.rating} style={starStyle} />
@@ -337,9 +345,9 @@ async componentDidMount(){
                 </View>
                 </View>
 
-         
 
-                  <View style={[styles.marginTB5]}> 
+
+                  <View style={[styles.marginTB5]}>
                                   <Text  style={[styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}>CONTATO:</Text>
                                           <Text  style={[styles.colorDarkGrey,styles.fontSize14,]}>{this.state.Result.address}</Text>
 
@@ -347,16 +355,16 @@ async componentDidMount(){
                          <Image style={[styles.icon18]} source={require('./../../../assets/call.png')} />
                          <Text  style={[styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}>  {this.state.Result.phone}</Text>
                       </View>
-                       
+
                   </View>
-         
+
 
             </View>
 
-          
 
-        
-        
+
+
+
         <View style={[styles.marginTBLR5]}>
         <Button  onPress={() => {
             this.props.navigation.navigate('Comments', {
@@ -365,7 +373,7 @@ async componentDidMount(){
             <Text>Avaliações</Text>
           </Button>
         </View>
-        
+
        </ScrollView>
        <Footer style={[styles.bgColorWhite,styles.borderTop]}>
           <FooterTab style={[styles.bgColorWhite]}>
@@ -379,14 +387,14 @@ async componentDidMount(){
             <Button  onPress={()=> this.props.navigation.navigate('offers')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/offer.png')} />
             </Button>
-        
+
             <Button onPress={()=> this.props.navigation.navigate('Account1')}>
             <Image style={[styles.icon20]} source={require('./../../../assets/user.png')} />
             </Button>
           </FooterTab>
-          </Footer> 
+          </Footer>
         </Container>
-    
+
     );
   }
 }

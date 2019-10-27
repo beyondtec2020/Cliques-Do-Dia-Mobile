@@ -30,12 +30,12 @@ import {
 
 
 class MainHeader extends Component {
-  
+
   constructor(props)
   {
     super();
     this.state = {
-    
+
     }
     this.openDrawer = this.openDrawer.bind(this);
     //this.props.navigation.setParams({ tabBarVisible: false });
@@ -45,6 +45,7 @@ class MainHeader extends Component {
     this.props.navigation.toggleDrawer();
 }
     render() {
+
       return (
         <Header style={[styles.Mainheader]} >
         <Left style={[styles.headerLeft]}>
@@ -66,4 +67,4 @@ class MainHeader extends Component {
        );
     }
   }
-export default MainHeader;  
+export default MainHeader;
