@@ -114,6 +114,7 @@ async componentDidMount() {
   })
   .then(response => response.json())
   .then((responseJson)=> {
+    debugger;
     this.setState({
      Result: responseJson,
      email:responseJson.user.email,
@@ -326,9 +327,11 @@ fetch(`${baseURL}/user/update-password`, {
 
          <Header style={[styles.Mainheader]} >
           <Left  style={[styles.headerLeft]}>
-          <Button  onPress={()=> this.props.navigation.navigate('Dashboard')} transparent>
-             <Image style={{height:18,width:20}} source={require('./../../../assets/back.png')} />
-          </Button>
+          {
+          //   <Button  onPress={()=> this.props.navigation.navigate('Dashboard')} transparent>
+          //    <Image style={{height:18,width:20}} source={require('./../../../assets/back.png')} />
+          // </Button>
+        }
           </Left>
           <Body style={[styles.headerBody]}>
             <Title> <Text style={[styles.colorWhite,styles.fontSize22,styles.ValignCenter,styles.fontWeight500,styles.alignCenter]}>Meu Perfil </Text></Title>

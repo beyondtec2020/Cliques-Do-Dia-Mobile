@@ -1,5 +1,5 @@
 {
-  "name": "FitnessApp",
+  "name": "Cliques-Do-Dia",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "@paraboly/react-native-video-modal": "0.0.20",
     "@react-native-community/blur": "^3.3.1",
     "axios": "^0.19.0",
+    "moment": "^2.24.0",
     "native-base": "^2.12.1",
     "react": "16.8.3",
     "react-moment": "^0.9.2",
@@ -68,6 +69,8 @@
     "babel-jest": "24.8.0",
     "jest": "24.8.0",
     "metro-react-native-babel-preset": "0.54.1",
+    "nodemon": "^1.19.4",
+    "react-native-cli": "^2.0.1",
     "react-test-renderer": "16.8.3"
   },
   "jest": {

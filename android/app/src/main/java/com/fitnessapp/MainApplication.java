@@ -3,6 +3,7 @@ package com.fitnessapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.imagepicker.ImagePickerPackage;
 import co.apptailor.googlesignin.RNGoogleSigninPackage;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
@@ -13,7 +14,6 @@ import com.zmxv.RNSound.RNSoundPackage;
 import com.horcrux.svg.SvgPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
-import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -23,6 +23,7 @@ import com.facebook.FacebookSdk;
 
 import com.facebook.CallbackManager;
 import com.facebook.appevents.AppEventsLogger;
+
 
 
 
@@ -47,6 +48,7 @@ private static CallbackManager mCallbackManager = CallbackManager.Factory.create
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNGestureHandlerPackage(),
             new ImagePickerPackage(),
             new RNGoogleSigninPackage(),
             new FBSDKPackage(mCallbackManager),
@@ -56,8 +58,7 @@ private static CallbackManager mCallbackManager = CallbackManager.Factory.create
             new RNSoundPackage(),
             new SvgPackage(),
             new LinearGradientPackage(),
-            new RNCWebViewPackage(),
-            new RNGestureHandlerPackage()
+            new RNCWebViewPackage()
       );
     }
 

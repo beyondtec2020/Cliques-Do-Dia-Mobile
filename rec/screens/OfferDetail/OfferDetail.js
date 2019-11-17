@@ -106,13 +106,14 @@ GenerateCoupon(){
         )
       .then(response => response.json())
       .then((responseJson)=> {
-        this.setState({
-          CouponResult: responseJson,
-        });
-        debugger;
+        if (responseJson.status == true) {
+          this.setState({
+            CouponResult: responseJson
+          });
+        }
         // console.log("Result of coupon: ",this.state.CouponResult);
 
-        // alert(this.state.CouponResult.message);
+        alert(responseJson.message);
 
         this.setState({
           progressVisible: false,
@@ -214,16 +215,18 @@ async componentDidMount(){
 
          <Header style={[styles.Mainheader]} >
           <Left  style={[styles.headerLeft]}>
-          <Button onPress={this.openDrawer}  transparent>
-          <Image style={{height:15,width:18}} source={require('./../../../assets/menu.png')} />
-          </Button>
+          {
+          // <Button onPress={this.openDrawer}  transparent>
+          // <Image style={{height:15,width:18}} source={require('./../../../assets/menu.png')} />
+          //</Button>
+          }
           </Left>
           <Body style={[styles.headerBody]}>
             <Title> <Text style={[styles.colorWhite,styles.fontSize22,styles.ValignCenter,styles.fontWeight500,styles.alignCenter]}>Macarronada Italiana</Text></Title>
           </Body>
           <Right style={[styles.headerRight]}>
-          <Image style={[styles.Icon20,styles.ValignCenter]} source={require('./../../../assets/star.png')} />
-
+          {// <Image style={[styles.Icon20,styles.ValignCenter]} source={require('./../../../assets/star.png')} />
+}
           </Right>
         </Header>
 
@@ -341,7 +344,7 @@ async componentDidMount(){
                <Text  style={[styles.marginL5,styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}>Classificação:</Text>
                 <View style={[styles.flexRow]}>
                      <Star score={this.state.Result.rating} style={starStyle} />
-                      <Text style={[styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}> {this.state.Result.rating} /5</Text>
+                      <Text style={[styles.colorDarkGrey,styles.marginB5,styles.fontSize14,styles.fontWeight500]}> {this.state.Result.rating && this.state.Result.rating.toFixed(1)} /5</Text>
                 </View>
                 </View>
 

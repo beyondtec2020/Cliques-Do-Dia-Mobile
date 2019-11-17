@@ -3,6 +3,7 @@ import { TouchableOpacity, TextInput, StyleSheet, Platform,Image, ImageBackgroun
 
 import styles, { colors } from '../../style/style';
 import MyWorkoutsStyle from './style/MyWorkoutsStyle';
+import { ProgressDialog } from 'react-native-simple-dialogs';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Star from 'react-native-star-view';
 import {
@@ -62,6 +63,7 @@ class Comments extends Component {
       l4T:false,
       l5T:false,
       l6T:false,
+      progressVisible: false
     }
     this.openDrawer = this.openDrawer.bind(this);
     this.onIncrementDecrement1= this.onIncrementDecrement1.bind(this);
@@ -118,10 +120,12 @@ FetchReviews(itemId){
 
   const url=`${baseURL}/single-post?id=${itemId}`
 
+  this.setState({ progressVisible: true });
 
       fetch(url)
       .then(response => response.json())
       .then((responseJson)=> {
+        debugger;
         this.setState({
         Result: responseJson.data,
         });
@@ -135,6 +139,9 @@ FetchReviews(itemId){
 
       })
       .catch(error=>console.log(error)) //to catch the errors if any
+      .finally(() => {
+        this.setState({ progressVisible: false });
+      })
 
 }
 
@@ -142,6 +149,8 @@ PostReview(){
 
   console.log("Posttttttttt",this.state.token);
   const URL= `${baseURL}/user/offer/${this.state.ItemId}/post-review`
+
+  this.setState({ progressVisible: true });
 
   axios.post(URL,
     JSON.stringify({
@@ -159,6 +168,13 @@ PostReview(){
   .then((responseJson)=> {
     // alert(responseJson.status);
     alert(JSON.stringify(responseJson.data.message.replace("", '')));
+
+    let response = this.state.Result;
+
+    response.review.all_reviews.push(responseJson.data.data);
+    this.setState({
+      Result: response,
+    });
    // console.log(responseJson);
    // this.setState({ Review:''})
    // this.FetchReviews(this.state.ItemId);
@@ -166,9 +182,15 @@ PostReview(){
     // this.props.navigation.navigate('offers');
   })
   .catch(error => {
-    debugger;
     alert(JSON.stringify(error))
   }) //to catch the errors if any
+  .finally(() => {
+    this.setState({
+      progressVisible: false,
+      Review: '',
+      Ratings: ''
+    })
+  })
 
 
 
@@ -202,11 +224,13 @@ PostReview(){
 
           <Header searchBar rounded style={[MyWorkoutsStyle.header]} >
               <Left  style={[styles.headerLeft]}>
-                <Button  onPress={()=>this.props.navigation.pop(1)}
+                {
+                // <Button  onPress={()=>this.props.navigation.pop(1)}
 
-                transparent>
-                   <Image style={{height:20,width:20}} source={require('./../../../assets/back.png')} />
-                </Button>
+                // transparent>
+                //    <Image style={{height:20,width:20}} source={require('./../../../assets/back.png')} />
+                // </Button>
+              }
               </Left>
               <Body style={[styles.headerBody]}>
                   <Text style={[styles.fontSize22,styles.colorWhite,styles.fontWeight500]}>AVALIAÇÕES </Text>
@@ -215,6 +239,12 @@ PostReview(){
               {/* <Image style={{height:25,width:25}} source={require('./../../../assets/Timeline/edit.png')} /> */}
               </Right>
           </Header>
+
+          <ProgressDialog
+            visible={this.state.progressVisible}
+            title="Buscando dados"
+            message="por favor, espere..."
+          />
 
 
 

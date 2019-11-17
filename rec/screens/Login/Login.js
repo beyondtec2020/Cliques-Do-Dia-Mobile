@@ -32,6 +32,17 @@ GoogleSignin.configure({
   webClientId:'952081920236-3v6tnd6jjk8v44bm9g08vd3odfdss42t.apps.googleusercontent.com'
 });
 
+// GoogleSignin.configure({
+//   scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
+//   webClientId: '<FROM DEVELOPER CONSOLE>', // client ID of type WEB for your server (needed to verify user ID and offline access)
+//   offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+//   hostedDomain: '', // specifies a hosted domain restriction
+//   loginHint: '', // [iOS] The user's ID, or email address, to be prefilled in the authentication UI if possible. [See docs here](https://developers.google.com/identity/sign-in/ios/api/interface_g_i_d_sign_in.html#a0a68c7504c31ab0b728432565f6e33fd)
+//   forceConsentPrompt: true, // [Android] if you want to show the authorization prompt at each login.
+//   accountName: '', // [Android] specifies an account name on the device that should be used
+//   iosClientId: '<FROM DEVELOPER CONSOLE>', // [iOS] optional, if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
+// });
+
 
 class Login extends Component {
   state = {
@@ -77,7 +88,7 @@ class Login extends Component {
 
         if (this.state.result.status) {
           AsyncStorage.clear();
-
+debugger;
           AsyncStorage.setItem('token', responseJson.data.access_token);
 
           this.setState({ progressVisible: false });
@@ -133,10 +144,15 @@ class Login extends Component {
         // alert("Offer Created Successfully.")
         // this.props.navigation.navigate('offers');
       })
-      .catch(error=>console.log(JSON.stringify(error))) //to catch the errors if any
+      .catch(error=>{
+        debugger;
+        console.log(JSON.stringify(error))
+      }) //to catch the errors if any
 
       // this.props.navigation.navigate('Dashboard');
     } catch (error) {
+      console.log(error);
+      debugger;
       // alert(JSON.stringify(error))
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
@@ -151,7 +167,7 @@ class Login extends Component {
   };
 
   initUser(token) {
-    fetch('https://graph.facebook.com/v3.2/me?fields=email,name&access_token=' + token)
+    fetch('https://graph.facebook.com/v3.2/me?fields=email,first_name,last_name&access_token=' + token)
     .then((response) => response.json())
     .then((json) => {
 
@@ -162,7 +178,6 @@ class Login extends Component {
       //  alert(JSON.stringify(json));
       //  alert(JSON.stringify(json.id));
 
-
        fetch(`${baseURL}/login/fb`,
        {
          method: 'POST',
@@ -172,8 +187,9 @@ class Login extends Component {
          },
          body: JSON.stringify({
           facebook_id:json.id,
-           first_name:json.name,
-           last_name:json.name
+           first_name:json.first_name,
+           last_name:json.last_name,
+            email: json.email,
          })
        })
        .then(response => response.json())
@@ -244,7 +260,7 @@ class Login extends Component {
           </View>
 
           <LoginButton
-            readPermissions = {['public_profile']}
+            readPermissions = {['public_profile'], ['email']}
             style = {{ height: 30, marginLeft:15, marginRight:15 }}
             onLoginFinished = {(error, result) => {
               if (error) {
@@ -260,7 +276,10 @@ class Login extends Component {
                 )
               }
             }}
-            onLogoutFinished={() => console.log("logout.")}
+            onLogoutFinished={(err) => {
+              debugger;
+              console.log("logout.")
+            }}
           />
 
           <GoogleSigninButton

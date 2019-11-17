@@ -20,6 +20,7 @@ import {
   Body,
   Form,
   List,
+  LayoutAnimation,
   ListItem,
   Card,
   Footer,
@@ -37,11 +38,18 @@ import { ScrollView } from 'react-native-gesture-handler';
 import CarouselItem from './components/CarouselItem';
 import axios from 'axios';
 import { baseURL } from '../../../app.config';
+import ActionButton from 'react-native-action-button';
 
 // import Icon from '@expo/vector-icons/Ionicons';
 
 const IS_ANDROID = Platform.OS === 'android';
 const SLIDER_1_FIRST_ITEM = 1;
+
+const styles1 = StyleSheet.create({
+  actionButtonIcon: {
+    bottom: 40,
+  },
+});
 
 class Dashboard extends Component {
 
@@ -86,14 +94,16 @@ Images:[],
                   subtitle: 'Lorem ipsum dolor sit amet et nuncat mergitur',
                  illustration: 'https://i.ibb.co/7n8S6KB/Pvq7-BOht-T1c4-EPh4sp8-I.jpg'
               },
+          ],
+      isActionButtonVisible: true,
 
-          ]
     }
     this.openDrawer = this.openDrawer.bind(this);
     this.TabSwitch = this.TabSwitch.bind(this);
     this.fetchData=this.fetchData.bind(this);
   }
 
+  _listViewOffset = 0
 
   openDrawer() {
     this.props.navigation.toggleDrawer();
@@ -115,9 +125,21 @@ Images:[],
     })
     .then(response => {
       this.setState({ Result: response.data.data });
+
+      return response;
     })
     .finally(response => {
       this.setState({ progressVisible: false });
+
+      debugger;
+      if (response) {
+        if (response.response.status == 500) {
+          debugger;
+          AsyncStorage.removeItem('token');
+
+          this.props.navigation.navigate("Login");
+        }
+      }
     })
 
     this.carausalImages();
@@ -167,7 +189,7 @@ Images:[],
 
     axios.get(`${baseURL}/cities`)
     .then(response => {
-      this.setState({ Cities: response.data.data.data });
+      this.setState({ Cities: response.data.data });
 
       this.fetchData();
     })
@@ -183,34 +205,32 @@ Images:[],
     const { city_id, selectedTabId } = this.state;
     // this.state.Images = [];
 
-    axios.get(`${baseURL}/featured-slider?category_id=${selectedTabId}&city_id=${city_id}`)
-    .then(response => {
-      response.json()
-    })
-    .then(responseJson => {
-      // debugger;
-      // console.log("Images-----------:",this.state.Images);
+    // axios.get(`${baseURL}/featured-slider?category_id=${selectedTabId}&city_id=${city_id}`)
+    // .then(response => response.json())
+    // .then(responseJson => {
+    //   // debugger;
+    //   // console.log("Images-----------:",this.state.Images);
 
-      responseJson.data.map((Item)=>{
-        console.log("Images-----------:",Item);
-        this.state.Images.push({
-          title:'abc',
-          subtitle:'Earlier this morning, NYC',
-          id:Item.id,
-          illustration:Item.image
-        })
-        this.setState({ Images: this.state.Images },
-          () => { console.log("Images---araay--------:",this.state.Images) }
-        );
-      })
-    })
-    .catch(error => {
-      // debugger;
-      console.log(error)
-    })
-    .finally(response => {
+    //   responseJson.data.map((Item)=>{
+    //     console.log("Images-----------:",Item);
+    //     this.state.Images.push({
+    //       title:'abc',
+    //       subtitle:'Earlier this morning, NYC',
+    //       id:Item.id,
+    //       illustration:Item.image
+    //     })
+    //     this.setState({ Images: this.state.Images },
+    //       () => { console.log("Images---araay--------:",this.state.Images) }
+    //     );
+    //   })
+    // })
+    // .catch(error => {
+    //   // debugger;
+    //   console.log(error)
+    // })
+    // .finally(response => {
 
-    })
+    // })
   }
 
   handleOTP = (text) => {
@@ -298,6 +318,17 @@ mainExample (number, title) {
   );
 }
 
+_onScroll = (event) => {
+  const currentOffset = event.nativeEvent.contentOffset.y
+
+  if (currentOffset > 1000) {
+    this.setState({ isActionButtonVisible: false })
+  } else {
+    this.setState({ isActionButtonVisible: true })
+  }
+}
+
+
 
   render() {
     const example1 = this.mainExample(1, 'stack layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots');
@@ -313,13 +344,15 @@ mainExample (number, title) {
     // console.log(getStatusBarHeight());
     return (
       <Container>
+         <ScrollView onScroll={this._onScroll}>
 
-         <ScrollView>
           <Header  rounded style={[styles.Header,]} >
             <Left  style={[styles.headerLeft]}>
-              <Button onPress={this.openDrawer}  transparent>
-              <Image style={{height:15,width:18}} source={require('./../../../assets/menu.png')} />
-              </Button>
+            {
+            //   <Button onPress={this.openDrawer}  transparent>
+            //   <Image style={{height:15,width:18}} source={require('./../../../assets/menu.png')} />
+            //   </Button>
+            }
             </Left>
             <Body style={[styles.headerBody,]}>
 
@@ -355,9 +388,11 @@ mainExample (number, title) {
         }
             </Body>
             <Right style={[styles.headerRight]}>
-              <Button small transparent>
-              <Image style={{height:15,width:15}} source={require('./../../../assets/cart.png')} />
-              </Button>
+            {
+            //   <Button small transparent>
+            //   <Image style={{height:15,width:15}} source={require('./../../../assets/cart.png')} />
+            //   </Button>
+            }
             </Right>
 
           </Header>
@@ -413,16 +448,22 @@ mainExample (number, title) {
 
 
         {/* Offers for You */}
-
-
+        {
+          // this.state.isActionButtonVisible &&
+          //   <View style={{ width: 60, height: 60, zIndex: 10000000, borderRadius: 30, backgroundColor: '#ee6e73', position: 'fixed', top: 50, right: 20, backgroundColor: "#f3f3f3" }}>
+          //     <ActionButton
+          //       buttonColor = 'rgba(231,76,60,1)'
+          //       onPress={() => { console.log('hi')}}
+          //     />
+          //   </View>
+        }
           <View>
           {
               (this.state.Result.length!=0)?
           <List style={[styles.marginT5,styles.marginLR5]}>
          {
 
-         this.state.Result.map( (x,i) =>
-         (
+         this.state.Result.map( (x,i) => (
           // console.log("Tittle:",x.title);  // value={x.id}  />
             // console.log("images:",x.images),
 
@@ -433,7 +474,7 @@ mainExample (number, title) {
 
            <ListItem thumbnail onPress={()=> this.props.navigation.navigate('OfferDetail',{itemId:x.id})}>
            <Left style={[]}>
-           <Image style={{height:65,width:80}} source={{uri:x.images}} />
+           <Image style={{height:65,width:80}} source={{uri: typeof(x.images) == 'string' ? x.images : ''}} />
            {/* <Image style={{height:65,width:80}} source={require('./../../../assets/images/2.jpg')} /> */}
 
            </Left>
@@ -446,7 +487,7 @@ mainExample (number, title) {
 
 
                   {/* <Text style={[styles.fontSize13,styles.colorGrey,styles.LineThrough]}> poR</Text> */}
-                    <Text  style={[styles.colorGreen,styles.fontSize14,styles.fontWeight500]} note numberOfLines={1}>  poR$ {x.max_price}</Text>
+                    <Text  style={[styles.colorGreen,styles.fontSize14,styles.fontWeight500]} note numberOfLines={1}>  por $ {x.max_price}</Text>
 
              </View>
 
@@ -565,26 +606,36 @@ mainExample (number, title) {
         {/* ---------End------- Offers for You */}
 
 
-       </ScrollView>
+        </ScrollView>
 
-       <Footer style={[styles.bgColorWhite,styles.borderTop]}>
-          <FooterTab style={[styles.bgColorWhite]}>
-            <Button onPress={()=> this.props.navigation.navigate('Dashboard')}>
-              <Image active style={[styles.icon20]} source={require('./../../../assets/home.png')} />
-            </Button>
-            <Button  onPress={()=> this.props.navigation.navigate('Coupons')}>
-            <Image style={[styles.icon20]} source={require('./../../../assets/coupon.png')} />
-            </Button>
+        <View>
+          <Footer style={[styles.bgColorWhite,styles.borderTop]}>
+            <FooterTab style={[styles.bgColorWhite]}>
+              <Button onPress={()=> this.props.navigation.navigate('Dashboard')}>
+                <Image active style={[styles.icon20]} source={require('./../../../assets/home.png')} />
+              </Button>
+              <Button  onPress={()=> this.props.navigation.navigate('Coupons')}>
+              <Image style={[styles.icon20]} source={require('./../../../assets/coupon.png')} />
+              </Button>
 
-            <Button  onPress={()=> this.props.navigation.navigate('offers')}>
-            <Image style={[styles.icon20]} source={require('./../../../assets/offer.png')} />
-            </Button>
+              <Button  onPress={()=> this.props.navigation.navigate('offers')}>
+              <Image style={[styles.icon20]} source={require('./../../../assets/offer.png')} />
+              </Button>
 
-            <Button onPress={()=> this.props.navigation.navigate('Account1')}>
-            <Image style={[styles.icon20]} source={require('./../../../assets/user.png')} />
-            </Button>
-          </FooterTab>
+              <Button onPress={()=> this.props.navigation.navigate('Account1')}>
+              <Image style={[styles.icon20]} source={require('./../../../assets/user.png')} />
+              </Button>
+            </FooterTab>
           </Footer>
+          </View>
+
+          {
+          // <ActionButton
+          //   buttonColor="rgba(231,76,60,1)"
+          //   style={styles1.actionButtonIcon}
+          //   onPress={()=> this.props.navigation.navigate('Coupons')}
+          // />
+        }
         </Container>
 
     );

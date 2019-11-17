@@ -159,9 +159,9 @@ fetchData(){
     progressVisible: true,
   });
 
-console.log("cat id----: ",this.state.selectedTabId)
-console.log("city id----: ",this.state.city_id);
-console.log("searchText id----: ",this.state.searchText);
+// console.log("cat id----: ",this.state.selectedTabId)
+// console.log("city id----: ",this.state.city_id);
+// console.log("searchText id----: ",this.state.searchText);
 
 
 const url=`${baseURL}/user/coupons?coupon_status=${this.state.selectedTabId}`;
@@ -175,12 +175,9 @@ fetch(url,
       'Authorization': 'Bearer ' + this.state.token
    } }
   )
-.then(response => {
-  debugger;
-  return response.json()
-})
+.then(response => response.json())
 .then((responseJson)=> {
-  debugger;
+  // debugger;
   this.setState({
    Result: responseJson.data,
   });
@@ -200,10 +197,7 @@ fetch(url,
   });
 
 })
-.catch(error => {
-  debugger;
-  console.log(error)
-}) //to catch the errors if any
+.catch(error => console.log(error)) //to catch the errors if any
 
 
 }
@@ -223,10 +217,10 @@ UseCoupon(id){
 
 
 
-  console.log("this.state.offer_id=",id);
+  // console.log("this.state.offer_id=",id);
     const URL=`${baseURL}/user/offer/${id}/use-coupon`
 
-            console.log("URL:",URL);
+            // console.log("URL:",URL);
         fetch(URL,
           {
             method: 'POST',
@@ -241,7 +235,7 @@ UseCoupon(id){
           this.setState({
           CouponResult: responseJson,
           });
-          console.log("Result of coupon: ",this.state.CouponResult);
+          // console.log("Result of coupon: ",this.state.CouponResult);
 
            alert("concluída");
            this.fetchData();
@@ -262,10 +256,10 @@ UseCoupon(id){
 
 
 
-    console.log("not used this.state.offer_id=",id);
+    // console.log("not used this.state.offer_id=",id);
       const URL=`${baseURL}/user/offer/${id}/no-use-coupon`
 
-              console.log("URL:",URL);
+              // console.log("URL:",URL);
           fetch(URL,
             {
               method: 'POST',
@@ -280,7 +274,7 @@ UseCoupon(id){
             this.setState({
             CouponResult: responseJson,
             });
-            console.log("Result of coupon: ",this.state.CouponResult);
+            // console.log("Result of coupon: ",this.state.CouponResult);
 
              alert("concluída");
              this.fetchData();

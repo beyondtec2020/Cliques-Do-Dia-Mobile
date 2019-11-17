@@ -174,11 +174,12 @@ ConfirmDelete(id){
 onDelete(id){
   console.log("ondelete")
 
+
 const deleteurl=`${baseURL}/user/delete-ad/${id}`;
 
     fetch(deleteurl,
     {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -250,7 +251,6 @@ fetchData(){
 
 // })
 // .catch(error=>console.log(error)) //to catch the errors if any
-
 fetch(`${baseURL}/user/offers?user_id=me`,
   {
     method: 'GET',
@@ -276,13 +276,14 @@ fetch(`${baseURL}/user/offers?user_id=me`,
   //   console.log("id:",x.id);
   //   console.log("Tittle:",x.title);
   // })
-  this.setState({
-    progressVisible: false,
-  });
 
 })
 .catch(error=>console.log(error)) //to catch the errors if any
-
+.finally(() => {
+  this.setState({
+    progressVisible: false,
+  });
+})
 
 
 
@@ -322,9 +323,11 @@ componentWillUnmount () {
 
          <Header style={[styles.Mainheader]} >
           <Left  style={[styles.headerLeft]}>
-          <Button onPress={()=> this.props.navigation.navigate('Dashboard')} transparent>
-               <Image style={{height:20,width:20}} source={require('./../../../assets/back.png')} />
-          </Button>
+          {
+          // <Button onPress={()=> this.props.navigation.navigate('Dashboard')} transparent>
+          //      <Image style={{height:20,width:20}} source={require('./../../../assets/back.png')} />
+          // </Button>
+        }
           </Left>
           <Body style={[styles.headerBody]}>
             <Title> <Text style={[styles.colorWhite,styles.fontSize20,styles.fontWeight500,styles.alignCenter]}>Lista de
@@ -332,9 +335,11 @@ Ofertas</Text></Title>
           </Body>
           <Right style={[styles.headerRight]}>
 
-          <TouchableOpacity style={[styles.ValignCenter]} onPress={()=> this.props.navigation.navigate('CreateOffer')} >
+          {
+            <TouchableOpacity style={[styles.ValignCenter]} onPress={()=> this.props.navigation.navigate('CreateOffer')} >
              <Text style={[styles.colorWhite,styles.fontSize16]}> Criar Oferta </Text>
           </TouchableOpacity>
+        }
           </Right>
         </Header>
 
@@ -351,7 +356,7 @@ Ofertas</Text></Title>
                   <CardItem cardBody>
                     <View style={[styles.marginTB10,styles.marginLR15]}>
                           <View style={[styles.flexRow,]}>
-                              <Thumbnail square small source={{uri:x.images}} />
+                              <Thumbnail square small source={{uri:typeof(x.images) == 'string' ? x.images : ''}} />
                                 <Text style={[styles.ValignCenter,styles.marginL20,styles.fontWeight500,styles.fontSize17,styles.colorDarkGrey,styles.marginB5]}>{x.title}</Text>
                           </View>
                           <Text style={[styles.fontSize13,styles.marginT15,styles.colorDarkGrey]} >{x.short_desc}</Text>
